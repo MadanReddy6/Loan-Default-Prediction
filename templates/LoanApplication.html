@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %} Loan Applications {% endblock %}
+
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="panel">
+                <h2 class="text-center">Loan Default Prediction</h2>
+                <form action="/predict" method="post">
+                    <div class="form-group">
+                        <label for="age">Age:</label>
+                        <input type="text" class="form-control" id="age" name="Age" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="income">Income:</label>
+                        <input type="text" class="form-control" id="income" name="Income" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loanAmount">Loan Amount:</label>
+                        <input type="text" class="form-control" id="loanAmount" name="LoanAmount" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="creditScore">Credit Score:</label>
+                        <input type="text" class="form-control" id="creditScore" name="CreditScore" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="monthsEmployed">Months Employed:</label>
+                        <input type="text" class="form-control" id="monthsEmployed" name="MonthsEmployed" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="numCreditLines">Number of Credit Lines:</label>
+                        <input type="text" class="form-control" id="numCreditLines" name="NumCreditLines" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="interestRate">Interest Rate:</label>
+                        <input type="text" class="form-control" id="interestRate" name="InterestRate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loanTerm">Loan Term:</label>
+                        <input type="text" class="form-control" id="loanTerm" name="LoanTerm" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="dtiRatio">DTI Ratio:</label>
+                        <input type="text" class="form-control" id="dtiRatio" name="DTIRatio" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="education">Education:</label>
+                        <select class="form-control" id="education" name="Education" required>
+                            <option value=1>High School</option>
+                            <option value=2>Bachelor's</option>
+                            <option value=3>Master's</option>
+                            <option value=4>PhD</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="employmentType">Employment Type:</label>
+                        <select class="form-control" id="employmentType" name="EmploymentType" required>
+                            <option value=1>Unemployed</option>
+                            <option value=2>Part-time</option>
+                            <option value=3>Full-time</option>
+                            <option value=4>Self-employed</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="maritalStatus">Marital Status:</label>
+                        <select class="form-control" id="maritalStatus" name="MaritalStatus" required>
+                            <option value=1>Single</option>
+                            <option value=2>Married</option>
+                            <option value=3>Divorced</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="hasMortgage">Do you have a mortgage?</label>
+                        <select class="form-control" id="hasMortgage" name="HasMortgage" required>
+                            <option value=1>Yes</option>
+                            <option value=0>No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="hasDependents">Do you have dependents?</label>
+                        <select class="form-control" id="hasDependents" name="HasDependents" required>
+                            <option value=1>Yes</option>
+                            <option value=0>No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="loanPurpose">Loan Purpose:</label>
+                        <select class="form-control" id="loanPurpose" name="LoanPurpose" required>
+                            <option value=1>Auto</option>
+                            <option value=2>Business</option>
+                            <option value=3>Education</option>
+                            <option value=4>Home</option>
+                            <option value=5>Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="hasCosigner">Do you have a co-signer?</label>
+                        <select class="form-control" id="hasCosigner" name="HasCoSigner" required>
+                            <option value=1>Yes</option>
+                            <option value=0>No</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{%endblock%}
