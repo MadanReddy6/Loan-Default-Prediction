@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %} Home Loan {% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Home Loan</h1>
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <img src="../static/images/house-image.jpg" class="img-fluid rounded" alt="Home Loan" style="height: 400px;">
+        </div>
+        <div class="col-md-6">
+            <h2>Get a Home Loan</h2>
+            <p>At LoanZone, we offer home loans to help you purchase your dream home. Whether you are buying a new home or refinancing an existing one, we have the right solution for you.</p>
+            <p>Our home loans come with competitive interest rates, flexible repayment terms, and quick approval processes. Apply now and get the financial support you need to buy your dream home.</p>
+            <a href="{{ url_for('LoanApplication_page') }}" class="btn btn-primary">Apply for Home Loan</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

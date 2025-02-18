@@ -1,31 +1,75 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request,jsonify
 import joblib
 import numpy as np
 import pandas as pd
+import mysql.connector
+
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.pipeline import Pipeline
 
 app = Flask(__name__)
 
+# connecting database
+try:
+    conn = mysql.connector.connect(
+        host='localhost',
+        user="root",
+        password='Reddy@656',
+        database='loan_db'
+    )
+    cursor = conn.cursor()
+
+except mysql.connector.Error as e:
+    print('Error connecting to MySQL database:', e)
+
 # Load your trained model
 model = joblib.load('loan_default_model.pkl')
 
 @app.route('/')
 def index():
-    return render_template('base.html')
+    return render_template('index.html')
+@app.route('/contactus_page')
+def contactus_page():
+    return render_template('contactus.html')
+
+@app.route('/aboutus_page')
+def aboutus_page():
+    return render_template('about.html')
+
+@app.route('/personalLoan_page')
+def personalLoan_page():
+    return render_template('personalloan.html')
+
+@app.route('/autoLoan_page')
+def autoLoan_page():
+    return render_template('autoloan.html')
+
+@app.route('/homeLoan_page')
+def homeLoan_page():
+    return render_template('homeloan.html')
 
 @app.route('/defaultPrediction_page')
 def defaultPrediction_page():
     return render_template('defaultPrediction.html')
 
-@app.route('/RiskAnalysis_page')
-def RiskAnalysis_page():
-    return render_template('RiskAnalysis.html')
+@app.route('/educationLoan_page')
+def educationLoan_page():
+    return render_template('educationloan.html')
+
+@app.route('/businessLoan_page')
+def businessLoan_page():
+    return render_template('businessloan.html')
+
+# @app.route('/RiskAnalysis_page')
+# def RiskAnalysis_page():
+#     return render_template('RiskAnalysis.html')
 
 @app.route('/LoanApplication_page')
 def LoanApplication_page():
     return render_template('LoanApplication.html')
+
+
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -58,39 +102,36 @@ def predict():
     # Render result template
     return render_template('results.html', prediction=prediction[0], risk_probability=risk_probability, credibility_score=credibility_score)
 
-@app.route('/riskAnalysis_page')
-def riskAnalysis_page():
-    # Read data from CSV
-    df = pd.read_csv('data.csv')
+@app.route('/RiskAnalysis_page')
+def RiskAnalysis_page():
+    # Establish the connection to the database
+    
+    cursor = conn.cursor()
+ 
+    # cursor.execute('''SELECT LoanTerm, MaritalStatus, DTIRatio, NumCreditLines, LoanAmount, InterestRate, `Default`  FROM loan_data''')
+    # result = cursor.fetchall()
+    
+    cursor.execute('''SELECT LoanTerm, MaritalStatus, DTIRatio, NumCreditLines, LoanAmount, InterestRate, `Default` FROM loan_data''')
+    data = cursor.fetchall()
 
-    # Calculate correlations for the heatmap
-    correlation_matrix = df[['Default', 'InterestRate', 'LoanAmount', 'NumCreditLines', 'DTIRatio', 'MaritalStatus', 'LoanTerm']].corr().values.tolist()
+    # Send data in a structure suitable for chart
+   
+    
+    return data
 
-    # Prepare the data for the scatter plot
-    X = df.drop('Default', axis=1)
-    y = df['Default']
-
-    # Create a pipeline that fits the model
-    model = Pipeline(steps=[
-        ('classifier', DecisionTreeClassifier())
-    ])
-
-    # Split the data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-    # Train your model
-    model.fit(X_train, y_train)
-
-    # Get default probabilities
-    default_probabilities = model.predict_proba(X_test)[:, 1]
-
-    # Get the corresponding Loan Amounts
-    loan_amounts = X_test['LoanAmount'].values.tolist()
-
-    # Prepare scatter plot data
-    scatter_plot_data = [{'x': loan_amounts[i], 'y': default_probabilities[i]} for i in range(len(loan_amounts))]
-
-    return render_template('RiskAnalysis.html', correlation_matrix=correlation_matrix, scatter_plot_data=scatter_plot_data)
+@app.route('/riskAnalysis_data')
+def riskAnalysis_data():
+    cursor = conn.cursor()
+    cursor.execute('''SELECT LoanTerm, MaritalStatus, DTIRatio, NumCreditLines, LoanAmount, InterestRate, `Default` FROM loan_data''')
+    data = cursor.fetchall()
+    
+    # Convert data to DataFrame
+    df = pd.DataFrame(data, columns=['LoanTerm', 'MaritalStatus', 'DTIRatio', 'NumCreditLines', 'LoanAmount', 'InterestRate', 'Default'])
+    
+    # Calculate correlation matrix
+    correlation_matrix = df.corr().to_dict()
+    
+    return jsonify(correlation_matrix)
 
 if __name__ == '__main__':
     app.run(debug=True)

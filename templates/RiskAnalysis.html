@@ -1,82 +1,73 @@
 {% extends 'base.html' %}
 {% block title %} Default Prediction {% endblock %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-heatmap@0.2.0/dist/chartjs-chart-heatmap.min.js"></script>
 
 {% block content %}
 <h1 class="text-center">Loan Default Prediction</h1>
 <div class="row">
-    <div class="text-center col-lg-6" style="height: 350vh;">
-        <h2>Heatmap of Selected Feature Correlations</h2>
-        <canvas id="heatmapChart"></canvas>
-    </div>
-    <div class="text-center col-lg-6">
-        <h2>Scatter Plot of Loan Amount vs. Default Probability</h2>
-        <canvas id="scatterPlotChart"></canvas>
-    </div>
+    <h1>Risk Analysis - Heatmap</h1>
+
+    <!-- Create a canvas for the chart -->
+    <canvas id="heatmap" width="800" height="400"></canvas>
+    <script>
+        // Load the correlation matrix data (in real usage, you would load this from the file generated in Jupyter)
+        fetch('/riskAnalysis_data')
+            .then(response => response.json())
+            .then(cor => {
+                console.log('Correlation Data:', cor); // Check if the data is fetched correctly
+
+                const ctx = document.getElementById('heatmap').getContext('2d');
+                
+                // Extracting labels from the keys of the correlation matrix
+                const labels = Object.keys(cor);
+                console.log('Labels:', labels);  // Ensure that labels are correct
+
+                // Mapping the data to Chart.js format
+                const heatmapData = [];
+                labels.forEach((label1, rowIndex) => {
+                    labels.forEach((label2, colIndex) => {
+                        heatmapData.push({
+                            x: colIndex,
+                            y: rowIndex,
+                            v: cor[label1][label2]  // Use the correlation value here
+                        });
+                    });
+                });
+
+                // Create the heatmap
+                const heatmap = new Chart(ctx, {
+                    type: 'heatmap',  // Make sure the chart type is 'heatmap'
+                    data: {
+                        datasets: [{
+                            label: 'Correlation Matrix',
+                            data: heatmapData,
+                            backgroundColor: function (context) {
+                                const value = context.raw.v;
+                                return value < 0.2 ? '#FF0000' :
+                                       value < 0.4 ? '#FF6600' :
+                                       value < 0.6 ? '#FFFF00' :
+                                       value < 0.8 ? '#66FF00' :
+                                       '#00FF00';
+                            }
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: {
+                                type: 'category',
+                                labels: labels // X-axis labels are the features (columns)
+                            },
+                            y: {
+                                type: 'category',
+                                labels: labels // Y-axis labels are also the features (columns)
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(err => console.error('Error fetching the correlation data:', err)); // Handle errors
+    </script>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // Heatmap data
-    const heatmapData = {
-        labels: ['Default', 'InterestRate', 'LoanAmount', 'NumCreditLines', 'DTIRatio', 'MaritalStatus', 'LoanTerm'],
-        datasets: [{
-            label: 'Correlation',
-            data: {{ correlation_matrix|tojson }},
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 1
-        }]
-    };
-
-    // Heatmap options
-    const heatmapOptions = {
-        scales: {
-            x: {
-                beginAtZero: true
-            },
-            y: {
-                beginAtZero: true
-            }
-        }
-    };
-
-    // Create heatmap chart
-    const heatmapCtx = document.getElementById('heatmapChart').getContext('2d');
-    new Chart(heatmapCtx, {
-        type: 'bar', // Chart.js does not support heatmap natively, using bar chart as a placeholder
-        data: heatmapData,
-        options: heatmapOptions
-    });
-
-    // Scatter plot data
-    const scatterPlotData = {
-        datasets: [{
-            label: 'Default Probability',
-            data: {{ scatter_plot_data|tojson }},
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            borderColor: 'rgba(255, 99, 132, 1)',
-            borderWidth: 1
-        }]
-    };
-
-    // Scatter plot options
-    const scatterPlotOptions = {
-        scales: {
-            x: {
-                type: 'linear',
-                position: 'bottom'
-            }
-        }
-    };
-
-    // Create scatter plot chart
-    const scatterPlotCtx = document.getElementById('scatterPlotChart').getContext('2d');
-    new Chart(scatterPlotCtx, {
-        type: 'scatter',
-        data: scatterPlotData,
-        options: scatterPlotOptions
-    });
-</script>
 {% endblock %}

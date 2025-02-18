@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Personal Loan {% endblock %}
+
+{% block content %}
+<div id="loan-details" class="container loan-info-card">
+    <h2 class="section-title">Personal Loan Details</h2>
+    <p class="lead">A personal loan is a type of unsecured loan that can be used for various purposes such as medical expenses, debt consolidation, or home improvement.</p>
+    <ul>
+      <li>Loan amount: $5,000 - $50,000</li>
+      <li>Loan term: 1 - 7 years</li>
+      <li>Interest rate: 6% - 24% (depending on credit score)</li>
+      <li>Repayment frequency: Monthly</li>
+    </ul>
+    <p>Personal loans are typically unsecured, meaning they do not require collateral. The loan approval depends on your credit score and income level.</p>
+  </div>
+
+  <!-- Section 2: Eligibility Check Form -->
+  <div id="loan-eligibility" class="container form-container">
+    <h3 class="section-title">Check Your Eligibility</h3>
+    <p>Fill out the form to check if you're eligible for a personal loan.</p>
+    <form>
+      <div class="mb-3">
+        <label for="income" class="form-label">Monthly Income</label>
+        <input type="number" class="form-control" id="income" required>
+      </div>
+      <div class="mb-3">
+        <label for="credit-score" class="form-label">Credit Score</label>
+        <input type="number" class="form-control" id="credit-score" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Check Eligibility</button>
+    </form>
+  </div>
+
+  <!-- Section 3: Apply for a Loan Form -->
+  <div id="apply-form" class="container form-container">
+    <h3 class="section-title">Apply for a Personal Loan</h3>
+    <p>Submit your details to apply for a personal loan.</p>
+    <form>
+      <div class="mb-3">
+        <label for="name" class="form-label">Full Name</label>
+        <input type="text" class="form-control" id="name" required>
+      </div>
+      <div class="mb-3">
+        <label for="email" class="form-label">Email Address</label>
+        <input type="email" class="form-control" id="email" required>
+      </div>
+      <div class="mb-3">
+        <label for="loan-amount" class="form-label">Loan Amount</label>
+        <input type="number" class="form-control" id="loan-amount" required>
+      </div>
+      <div class="mb-3">
+        <label for="loan-term" class="form-label">Loan Term (Years)</label>
+        <input type="number" class="form-control" id="loan-term" required>
+      </div>
+      <button type="submit" class="btn btn-success">Apply Now</button>
+    </form>
+  </div>
+
+  {%endblock%}

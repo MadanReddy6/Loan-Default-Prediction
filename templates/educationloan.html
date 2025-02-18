@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %} Education Loan {% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Education Loan</h1>
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <img src="../static/images/education-loan.jpg" class="img-fluid rounded" alt="Education Loan" style="height: 400px;width: 450px;">
+        </div>
+        <div class="col-md-6">
+            <h2>Get an Education Loan</h2>
+            <p>At LoanZone, we offer education loans to help you achieve your academic goals. Whether you are pursuing higher education or specialized training, we have the right solution for you.</p>
+            <p>Our education loans come with competitive interest rates, flexible repayment terms, and quick approval processes. Apply now and get the financial support you need to invest in your future.</p>
+            <a href="{{ url_for('LoanApplication_page') }}" class="btn btn-primary">Apply for Education Loan</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
