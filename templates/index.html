@@ -1,17 +1,72 @@
 {% extends 'base.html' %}
 {% block title %} Loan default prediction {% endblock %}
+<style>
+        .step .icon {
+        font-size: 30px;
+        color: #007bff;
+        margin-bottom: 0px;
+    }
 
+
+    @media (max-width: 575px) {
+        #hero-section {
+            /* border: 2px solid red; */
+            height: 10vh;
+
+        }
+
+        .hero-section img {
+            /* border: 2px solid red; */
+            height: 10vh;
+        }
+
+        .navbar-nav,
+        a {
+            margin-left: 10px;
+        }
+
+    }
+
+    @media (min-width:800px) {
+        .Process {
+            width: 23%;
+        }
+    }
+
+    /* swiper-slide {
+        margin-bottom: 20px;
+    }
+
+    .mySwiper img {
+        height: 350px;
+        width: 300px;
+    }
+
+    @media (max-width: 768px) {
+        .mySwiper img {
+            height: 250px;
+            width: 200px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .mySwiper img {
+            height: 200px;
+            width: 150px;
+        }
+    } */
+</style>
 {% block content %}
 <!-- Hero Section with Background Image -->
 <div class="hero-section"
-    style="background-image: url('../static/images/man-7956041.jpg'); background-size: cover; background-position: center; height: 100vh; position: relative;">
+    style="background-image: url('../static/images/man-7956041.jpg'); background-size: cover; background-position: center; height: 120vh; position: relative;">
     <div class="container h-100 d-flex align-items-center justify-content-end">
         <div class="text-white" style="max-width: 600px;">
-            <h1 class="fw-bold" style="margin-top: 10px;">Smart Finance Solutions</h1>
+            <h1 class="fw-bold" style="margin-top: 10px; user-select: none;">Smart Finance Solutions</h1>
             <h1 class="fw-bold">For Your Business</h1>
             <p class="fs-5">Smart Loans For <span style="color: #00aaff;">Bright Futures</span></p>
             <a href="{{url_for('personalLoan_page')}}" class="btn btn-primary btn-lg me-2">Apply Loan →</a>
-            <a href="{{url_for('contactus_page')}}" class="btn btn-outline-light btn-lg">Contact Us →</a>
+            <a href="{{url_for('EMIcalculator_page')}}" class="btn btn-primary btn-lg me-2">EMI Calculator →</a>
         </div>
     </div>
 </div>
@@ -21,10 +76,10 @@
     <div class="row align-items-center">
         <div class="col-lg-6 col-md-12 position-relative">
             <div class="experience-box" style="margin-top: 200px;width: 140px;">
-                <span>15+<br>Years Of Experience</span>
+                <span>25+<br>Years Of Experience</span>
             </div>
-            <img src="../static/images/model-2099530.jpg" alt="Business Meeting" class="img-fluid rounded"
-                style="height: 600px;width: 100%;">
+            <img src="../static/images/executive-6922418_1920.jpg" alt="Business Meeting" class="img-fluid rounded"
+                style="height: 600px;width: 90%;">
             <!-- <img src="../static/images/calculator-385506.jpg" alt="Calculator"
                 class="img-thumbnail position-absolute" style="bottom: -20px; right: -20px; width: 150px;margin-bottom: 80px;"> -->
         </div>
@@ -32,22 +87,22 @@
             <h6 class="text-primary pt-3">WELCOME TO LoanZone </h6>
             <h2 class="fw-bold">Our Loans Will Fill Your Dreams Come True</h2>
             <p class="text-muted">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
-                et dolore magna aliqua.
+                At LoanZone, we are committed to helping you achieve your financial goals with ease and confidence. Whether you're looking to fund your education, expand your business, or fulfill any personal financial need, we offer tailored loan solutions to suit your requirements. With our quick and hassle-free loan process, competitive interest rates, and flexible repayment options, your dreams are within reach. Let us help you take the next step toward a brighter future.
             </p>
+            
             <ul class="list-unstyled">
                 <li><span class="check-icon">✔</span> Quick Loan Process</li>
                 <li><span class="check-icon">✔</span> Very Low Rates</li>
                 <li><span class="check-icon">✔</span> Small Business Loan</li>
-                <li><span class="check-icon">✔</span> Studying Abroad Loan</li>
+                <li><span class="check-icon">✔</span> Education Loan</li>
             </ul>
-            <a href="#" class="btn btn-outline-primary" style="margin-left:30px;">KNOW ABOUT US →</a>
+            <a href="/LoanApplication_page" class="btn btn-outline-primary" style="margin-left:30px;">Apply for loan→</a>
         </div>
     </div>
 </div>
 
 <div class="marquee-container">
-    <marquee behavior="scroll" direction="left">Auto Loan | Personal Loan | Buy Home Loan | Study Abroad Loan |
+    <marquee behavior="scroll" direction="left">Auto Loan | Personal Loan | Home Loan | Education Loan |
         Business Loan</marquee>
 </div>
 
@@ -76,8 +131,8 @@
     <h3 class="text-black text-center">OUR FEATURES</h3>
     <div class="row align-items-center feature-section">
         <div class="col-lg-6 col-md-12">
-            <img src="../static/images/woman-8957175_1920.jpg" class="img-fluid rounded" alt="Business Woman"
-                style="height: 500px; width: 100%;">
+            <img src="../static/images/BUSINESS WOMEN.jpg" class="img-fluid rounded" alt="Business Woman"
+                style="height: 600px; width: 100%;">
         </div>
         <div class="col-lg-6 col-md-12">
             <h2 class="feature-title">Quick Easy Flexible</h2>
@@ -86,61 +141,58 @@
                 flexibility.</p>
 
             <div class="d-flex align-items-center mt-4">
-                <div class="feature-icon">
-                    <i class="bi bi-people"></i>
-                </div>
+                
                 <div class="ms-3">
                     <h5 class="mb-1">Lower Rates</h5>
-                    <p class="mb-0">Can We Align On Lunch Orders Those Options Are Already Baked In With This Model Face
-                        Time</p>
+                    <p class="mb-0">By reducing rates, we can provide more affordable options for our clients while maintaining quality service. Let's ensure we align on pricing to maximize value for both parties.</p>
                 </div>
-            </div>
-
-            <div class="d-flex align-items-center mt-4">
-                <div class="feature-icon">
-                    <i class="bi bi-cash-stack"></i>
+                
                 </div>
-                <div class="ms-3">
-                    <h5 class="mb-1">Quick And Easy</h5>
-                    <p class="mb-0">Ramp Up High-Level, And We Need A Paradigm Shift Reach Out, Data-Point, Nor
-                        Wheelhouse</p>
+                
+                <div class="d-flex align-items-center mt-4">
+                    <div class="ms-3">
+                        <h5 class="mb-1">Quick And Easy</h5>
+                        <p class="mb-0">Our goal is to streamline processes and make things as efficient as possible. With minimal effort, we can achieve significant results and improve overall productivity.</p>
+                    </div>
                 </div>
-            </div>
+                
         </div>
     </div>
 </div>
 <!-- Process block -->
-<div class="container">
-    <h2>Our Working Process</h2>
-    <div class="row process">
-        <div class="col-lg-3 col-md-6 col-sm-12 step p-3 p-md-4 p-lg-5">
-            <div class="step-number">Step 01</div>
-            <i class="fas fa-file-alt icon"></i>
-            <h3>Application Submit</h3>
-            <p>Fill out the application form with all required details to initiate the process.</p>
-        </div>
-        <div class="col-lg-3 col-md-6 col-sm-12 step p-3 p-md-4 p-lg-5">
-            <div class="step-number">Step 02</div>
-            <i class="fas fa-user-check icon"></i>
-            <h3>Review & Verification</h3>
-            <p>Our team will review your application and verify the provided details.</p>
-        </div>
-        <div class="col-lg-3 col-md-6 col-sm-12 step p-3 p-md-4 p-lg-5">
-            <div class="step-number">Step 03</div>
-            <i class="fas fa-thumbs-up icon"></i>
-            <h3>Loan Approval</h3>
-            <p>Once verified, your loan request will be approved for further processing.</p>
-        </div>
-        <div class="col-lg-3 col-md-6 col-sm-12 step p-3 p-md-4 p-lg-5">
-            <div class="step-number">Step 04</div>
-            <i class="fas fa-hand-holding-usd icon"></i>
-            <h3>Loan Disbursement</h3>
-            <p>After approval, the loan amount will be disbursed to your account.</p>
+ <HR>
+    <div class="container bg-light py-4 text-center">
+        <h2 class="text-center mt-3">Our Working Process</h2>
+        <div class="d-flex flex-wrap justify-content-center gap-3">
+            <div class="step p-3 bg-white rounded shadow-sm" style="flex: 1 1 200px;">
+                <div class="step-number">Step 01</div>
+                <i class="fas fa-file-alt icon"></i>
+                <h3>Application Submit</h3>
+                <p>Fill out the application form with all required details to initiate the process.</p>
+            </div>
+            <div class="step p-3 bg-white rounded shadow-sm" style="flex: 1 1 200px;">
+                <div class="step-number">Step 02</div>
+                <i class="fas fa-user-check icon mb-0"></i>
+                <h3>Review & Verification</h3>
+                <p>Our team will review your application and verify the provided details.</p>
+            </div>
+            <div class="step p-3 bg-white rounded shadow-sm" style="flex: 1 1 200px;">
+                <div class="step-number">Step 03</div>
+                <i class="fas fa-thumbs-up icon"></i>
+                <h3>Loan Approval</h3>
+                <p>Once verified, your loan request will be approved for further processing.</p>
+            </div>
+            <div class="step p-3 bg-white rounded shadow-sm" style="flex: 1 1 200px;">
+                <div class="step-number">Step 04</div>
+                <i class="fas fa-hand-holding-usd icon"></i>
+                <h3>Loan Disbursement</h3>
+                <p>After approval, the loan amount will be disbursed to your account.</p>
+            </div>
         </div>
     </div>
-</div>
+    
 <!-- Company core values -->
-<h1 class="container text-center">Our Company Core Values</h1>
+<h1 class="container text-center my-3">Our Company Core Values</h1>
 <div class="innovation">
     <div class="table-container">
         <table>
@@ -156,7 +208,7 @@
             </tr>
         </table>
     </div>
-    <div class="container text-center">
+    <div class="container text-center mt-3">
         <div id="innovationContent" class="content">
             <h2>Innovation</h2>
             <p>We embrace new ideas and technologies to provide the best financial solutions.</p>
@@ -178,7 +230,7 @@
 </div>
 
 <!-- Team swiper -->
-<h3 class="container mb-3 text-center"> Our Dynamic Team</h3>
+<h3 class="container mb-3 text-center my-2"> Our Dynamic Team</h3>
 <swiper-container class="mySwiper mb-4" pagination="true" pagination-clickable="true" space-between="30"
     slides-per-view="3" autoplay="true" autoplay-delay="3000">
     <swiper-slide>
@@ -230,8 +282,108 @@
     <div class="container">
         <h1>GET A QUICK LOAN</h1>
         <p>Get A Business Loan Quickly</p>
-        <a href="#" class="btn-apply">APPLY FOR LOAN &gt;</a>
+        <a href="{{url_for('LoanApplication_page')}}" class="btn-apply">Predict Loan Default</a>
     </div>
 </div>
+
+<script>
+    // Ensure the zoom effect is applied correctly
+    document.addEventListener('DOMContentLoaded', function () {
+        const carouselItems = document.querySelectorAll('.carousel-item');
+        carouselItems.forEach(item => {
+            item.addEventListener('transitionend', function () {
+                if (item.classList.contains('active')) {
+                    item.querySelector('img').style.transform = 'scale(1.05)';
+                } else {
+                    item.querySelector('img').style.transform = 'scale(1)';
+                }
+            });
+        });
+
+        // Apply zoom effect to the first image initially
+        const firstActiveItem = document.querySelector('.carousel-item.active img');
+        if (firstActiveItem) {
+            firstActiveItem.style.transform = 'scale(1.05)';
+        }
+    });
+
+    // Change image after the carousel slides
+    $('#carouselExample').on('slide.bs.carousel', function (event) {
+        currentImage = event.to; // Get the index of the new active slide
+        changeZoomImage(); // Update the zoom image for the new active image
+    });
+
+    // Moving block
+    function changeLoan(type, event) {
+        let imageMap = {
+            'auto': '../static/images/car loan.jpg',
+            'personal': '../static/images/personal loan.jpg',
+            'home': '../static/images/home loan.jpg',
+            'study': '../static/images/education loan.jpg'
+        };
+
+        document.getElementById('loanImage').src = imageMap[type];
+
+        // Highlight selected loan
+        document.querySelectorAll('.loan-item').forEach(item => item.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    // Show header when scrolling upwards
+    let lastScrollTop = 0;
+    window.addEventListener('scroll', function () {
+        const navbar = document.querySelector('.navbar');
+        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        if (scrollTop > lastScrollTop) {
+            navbar.style.top = '-80px'; // Adjust based on your navbar height
+        } else {
+            navbar.style.top = '0';
+        }
+        lastScrollTop = scrollTop;
+    });
+
+    // company values
+    function showContent(contentType) {
+        // Hide all content divs
+        document.querySelectorAll('.content').forEach(function (div) {
+            div.style.display = 'none';
+        });
+
+        // Show the selected content div
+        document.getElementById(contentType + 'Content').style.display = 'block';
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const swiper = new Swiper('.mySwiper', {
+            slidesPerView: 3, // Default for larger screens
+            spaceBetween: 30,
+            autoplay: {
+                delay: 3000,
+                disableOnInteraction: false,
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+            breakpoints: {
+                0: {
+                    slidesPerView: 1, // Show 1 image per row on small screens
+                    spaceBetween: 10,
+                },
+                576: {
+                    slidesPerView: 2, // Show 2 images per row on medium screens
+                    spaceBetween: 20,
+                },
+                768: {
+                    slidesPerView: 3, // Show 3 images per row on larger screens
+                    spaceBetween: 30,
+                },
+            },
+        });
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-element-bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 {% endblock %}

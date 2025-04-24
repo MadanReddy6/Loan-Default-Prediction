@@ -18,8 +18,8 @@
         <div class="col-md-5 mt-lg-5 pt-lg-3">
             <div class="border border-black my-4 p-3">
                 <h3>Address</h3>
-                <p>#123, Cross Street</p>
-                <p>Delhi, India</p>
+                <p>#123, Gopuram Road</p>
+                <p>Puttaparthi, India</p>
             </div>
             <div class="border border-black my-4 p-3">
                 <h3>Business Hours</h3>
@@ -112,6 +112,36 @@ function validateContactForm() {
     return isValid;
 }
 </script>
+
+<script>
+    document.querySelector('#contactForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+    
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const subject = document.getElementById('subject').value;
+        const message = document.getElementById('message').value;
+    
+        fetch('/contact', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name, email, subject, message })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                alert(data.success);
+                document.querySelector('#contactForm').reset();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+    </script>
+    
 {% endblock %}
 
 
