@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %} Prediction Results {% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-center mb-4">Loan Prediction Dashboard</h1>
+
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <!-- Main Prediction Card -->
+            <div class="card shadow-lg mb-4 border-0" style="border-radius: 15px;">
+                <div class="card-header text-white text-center py-3"
+                    style="background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 15px 15px 0 0 !important;">
+                    <h3 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i> Loan Default Prediction
+                    </h3>
+                </div>
+                <div class="card-body text-center py-4">
+                    <div class="prediction-circle mx-auto mb-4 d-flex align-items-center justify-content-center"
+                        style="width: 150px; height: 150px; border-radius: 50%; background: {{ 'linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%)' if prediction == 1 else 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)' }};">
+                        <h2 class="text-white mb-0">{{ 'Default' if prediction == 1 else 'No Default' }}</h2>
+                    </div>
+
+                    {% if prediction == 0 %}
+                    <div class="alert alert-success d-inline-block" role="alert" style="border-radius: 10px;">
+                        <h4 class="alert-heading mb-2">
+                            <i class="fas fa-check-circle me-2"></i>Congratulations!
+                        </h4>
+                        <p class="mb-0">You are <strong>eligible</strong> for the loan.</p>
+                    </div>
+                    {% elif prediction == 1 %}
+                    <div class="alert alert-danger d-inline-block" role="alert" style="border-radius: 10px;">
+                        <h4 class="alert-heading mb-2">
+                            <i class="fas fa-times-circle me-2"></i>Sorry!
+                        </h4>
+                        <p class="mb-0">You are <strong>not eligible</strong> for the loan.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Stats Cards Row -->
+            <div class="row">
+                <!-- Risk Probability -->
+                <!-- Risk Probability Card -->
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm border-0" style="border-radius: 15px;">
+                        <div class="card-header text-white py-2"
+                            style="background: linear-gradient(135deg, #ff9966 0%, #ff5e62 100%); border-radius: 15px 15px 0 0 !important;">
+                            <h5 class="mb-0">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Risk Probability
+                            </h5>
+                        </div>
+                        <div class="card-body text-center py-3">
+                            <h2 class="text-danger">{{ risk_probability }}%</h2>
+                            <div class="progress mt-2" style="height: 10px; border-radius: 5px;">
+                                <div class="progress-bar bg-danger" role="progressbar"
+                                    style="width: {{ risk_probability }}%" aria-valuenow="{{ risk_probability }}"
+                                    aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Risk Category Card -->
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm border-0" style="border-radius: 15px;">
+                        <div class="card-header text-white py-2"
+                            style="background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%); border-radius: 15px 15px 0 0 !important;">
+                            <h5 class="mb-0">
+                                <i class="fas fa-shield-alt me-2"></i>Risk Category
+                            </h5>
+                        </div>
+                        <div class="card-body text-center py-3">
+                            <span class="badge fs-5 py-2 px-3 mt-2"
+                                style="background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);">
+                                {{ risk_category }}
+                            </span>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Credit Score Card -->
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm border-0" style="border-radius: 15px;">
+                        <div class="card-header text-white py-2"
+                            style="background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%); border-radius: 15px 15px 0 0 !important;">
+                            <h5 class="mb-0">
+                                <i class="fas fa-star me-2"></i>Credibility Score
+                            </h5>
+                        </div>
+                        <div class="card-body text-center py-3">
+                            <!-- <h2 class="text-success">{{ credibility_score }}</h2> -->
+                            <h2 class="text-success">{{ credit_score }}</h2>
+                            <div class="rating mt-2">
+                                {% for i in range(1,6) %}
+                                <i
+                                    class="fas fa-star {{ 'text-warning' if i <= (credit_score/200)|round(0, 'ceil')|int else 'text-secondary' }}"></i>
+                                {% endfor %}
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+    .prediction-circle {
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .prediction-circle:hover {
+        transform: scale(1.05);
+    }
+
+    .progress {
+        background-color: #f0f0f0;
+    }
+</style>
+{% endblock %}

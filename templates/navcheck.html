@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Navbar Design</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://kit.fontawesome.com/yourkitcode.js" crossorigin="anonymous"></script>
+    <style>
+        .navbar-brand img {
+            height: 50px;
+        }
+        .nav-link {
+            color: #1E1E50;
+            font-weight: 600;
+            margin: 0 10px;
+        }
+        .nav-link:hover {
+            color: #00D1FF;
+        }
+        .nav-item .active {
+            color: #00D1FF !important;
+        }
+        .search-cart-icons i {
+            font-size: 20px;
+            color: #1E1E50;
+            margin: 0 10px;
+            cursor: pointer;
+        }
+        .btn-apply {
+            background-color: #00D1FF;
+            color: white;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+        }
+        .btn-apply:hover {
+            background-color: #009ACD;
+            color: white;
+        }
+
+        /* cursol */
+        .carousel {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Zoom effect for images */
+    .carousel-item img {
+      transition: transform 0.3s ease;
+      transform-origin: center center;
+    }
+
+    /* Cursor zoom effect container */
+    .zoom-container {
+      position: absolute;
+      pointer-events: none;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .zoom-img {
+      position: absolute;
+      pointer-events: none;
+      transition: transform 0.1s ease;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg bg-white shadow-sm">
+        <div class="container">
+            <!-- Logo -->
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="../static/images/lonezone.jpeg" alt="Easilon Logo"> 
+                <span class="ms-2 fw-bold text-dark">LoanZone</span>
+            </a>
+
+            <!-- Navbar Toggler for Mobile -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Navbar Links -->
+            <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link active" href="#">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">About Us</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Our Services</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Pages</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Shop</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">News</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Contact Us</a></li>
+                </ul>
+            </div>
+
+            <!-- Search & Cart Icons -->
+            <!-- <div class="d-flex align-items-center search-cart-icons">
+                <i class="fas fa-search"></i>
+                <i class="fas fa-shopping-cart"></i>
+            </div> -->
+
+            <!-- Apply Button -->
+            <button class="btn btn-apply ms-3">APPLY FOR LOAN →</button>
+        </div>
+    </nav>
+    
+<!-- Zoom Effect Container -->
+
+  
+  <!-- Bootstrap Carousel -->
+  <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <img src="../static/images/man-7956041.jpg" class="d-block w-100" alt="First Image">
+      </div>
+      <div class="carousel-item">
+        <img src="../static/images/handshake-3100563.jpg" class="d-block w-100" alt="Second Image">
+      </div>
+      <div class="carousel-item">
+        <img src="../static/images/finance-4858797.jpg" class="d-block w-100" alt="Third Image">
+      </div>
+    </div>
+  
+    <!-- Carousel Controls -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+  </div>
+  
+  <!-- Bootstrap JS and dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // Zoom effect
+    const carouselImages = document.querySelectorAll('.carousel-item img');
+    const zoomContainer = document.getElementById('zoom-container');
+    const zoomImg = document.getElementById('zoom-img');
+  
+    // Change zoom image based on the carousel image
+    let currentImage = 0;
+  
+    function changeZoomImage() {
+      const activeImage = carouselImages[currentImage];
+      zoomImg.src = activeImage.src;
+    }
+  
+    // Track mouse position and zoom on hover
+    zoomContainer.addEventListener('mousemove', function(e) {
+      const containerRect = zoomContainer.getBoundingClientRect();
+      const mouseX = e.clientX - containerRect.left;
+      const mouseY = e.clientY - containerRect.top;
+  
+      const zoomFactor = 2; // Adjust zoom factor here
+      const offsetX = (mouseX / containerRect.width) * 100;
+      const offsetY = (mouseY / containerRect.height) * 100;
+  
+      zoomImg.style.transform = `scale(${zoomFactor}) translate(-${offsetX}%, -${offsetY}%)`;
+    });
+  
+    // Reset zoom when mouse leaves the container
+    zoomContainer.addEventListener('mouseleave', function() {
+      zoomImg.style.transform = 'scale(1) translate(0, 0)';
+    });
+  
+    // Change image after the carousel slides
+    $('#carouselExample').on('slide.bs.carousel', function(event) {
+      currentImage = event.to; // Get the index of the new active slide
+      changeZoomImage(); // Update the zoom image for the new active image
+    });
+  
+    // Initialize with the first image
+    changeZoomImage();
+  </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

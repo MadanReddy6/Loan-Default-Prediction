@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Loan Default Prediction{% endblock %}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{url_for('static',filename='Styles.css')}}">
+    <!-- <meta http-equiv="refresh" content="10"> -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- Replace 'yourkitcode' with your actual Font Awesome kit code -->
+    <script src="https://kit.fontawesome.com/your_actual_kit_code.js" crossorigin="anonymous"></script>
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">    
+</head>
+<body>
+    <!-- Navbar with Bootstrap classes -->
+    <nav class="navbar navbar-expand-lg bg-white shadow-sm sticky-top ">
+        <div class="container">
+            <!-- Logo -->
+            <a class="navbar-brand d-flex align-items-center" href="/index">
+                <img src="../static/images/lonezone.jpeg" alt="LoanZone Logo">
+                <span class="ms-2 fw-bold text-dark">LoanZone</span>
+            </a>
+
+            <!-- Navbar Toggler for Mobile -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Navbar Links -->
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link " href="{{url_for('index')}}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{url_for('Dashboard_page')}}">Dashboard</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Our Services</a>
+                        <ul class="dropdown-menu" aria-labelledby="servicesDropdown">
+                            <li><a class="dropdown-item" href="{{url_for('personalLoan_page')}}">Personal Loan</a></li>
+                          {#  <li><a class="dropdown-item" href="{{url_for('autoLoan_page')}}">Auto Loan</a></li>
+                            <li><a class="dropdown-item" href="{{url_for('homeLoan_page')}}">Home Loan</a></li>
+                            <li><a class="dropdown-item" href="{{url_for('educationLoan_page')}}">Education Loan</a></li>
+                            <li><a class="dropdown-item" href="{{url_for('businessLoan_page')}}">Business Loan</a></li>#}
+                        </ul>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" href="{{url_for('RiskAnalysis_page')}}">Data Analysis</a></li>
+                </ul>
+                <a class="btn btn-apply " href="{{ url_for('LoanApplication_page') }}">Predict Loan Default →</a>
+            </div>
+        </div>
+    </nav>
+
+    {% block content %}
+    {% endblock %}
+    
+    <footer class="footer mt-3">
+        <div class="container">
+            <div class="footer-top   ">
+                <div class="footer-logo  pt-3">
+                    <img src="../static/images/lonezone.jpeg" alt="Easilon Logo">
+                    <span>LoanZone</span>
+                </div>
+               
+                <div class="email-box">
+                    <input type="email" placeholder="Enter Email">
+                    <button>→</button>
+                </div>
+            </div>
+
+            <div class="footer-bottom row">
+                <div class="footer-column col-md-4 col-sm-12">
+                    <h3 class="">Explore</h3>
+                    <ul class="">
+                        <li><a href="">Our Services</a></li>
+                        <li><a href="">Meet The Team</a></li>
+                        <li><a href="">Recent News</a></li>
+                        <li><a href="{{url_for('contactus_page')}}">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-column col-md-4 col-sm-12">
+                    <h3 class="">Loan Services</h3>
+                    <ul class="">
+                        <li><a href="{{url_for('autoLoan_page')}}">Auto Loan</a></li>
+                        <li><a href="{{url_for('homeLoan_page')}}">Home Loan</a></li>
+                        <li><a href="{{url_for('educationLoan_page')}}">Education Loan</a></li>
+                        <li><a href="{{url_for('businessLoan_page')}}">Business Loan</a></li>
+                        <li><a href="{{url_for('personalLoan_page')}}">Personal Loan</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-column col-md-4 col-sm-12">
+                    <h3 class="">Get InTouch</h3>
+                    <p class="">Gopuram Road Puttaparthi</p>
+                    <p class="">📧 needhelp@company.com</p>
+                    <p class="">📞 +91 5698 0036 420</p>
+                </div>
+            </div>
+
+            <div class="footer-social ">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-youtube"></i></a>
+            </div>
+
+            <div class="footer-copy ">
+                <p>© Copyright 2025 By LoanZone HTML Template.</p>
+            </div>
+        </div>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Ensure the zoom effect is applied correctly
+        document.addEventListener('DOMContentLoaded', function () {
+            const carouselItems = document.querySelectorAll('.carousel-item');
+            carouselItems.forEach(item => {
+                item.addEventListener('transitionend', function () {
+                    if (item.classList.contains('active')) {
+                        item.querySelector('img').style.transform = 'scale(1.05)';
+                    } else {
+                        item.querySelector('img').style.transform = 'scale(1)';
+                    }
+                });
+            });
+
+            // Apply zoom effect to the first image initially
+            const firstActiveItem = document.querySelector('.carousel-item.active img');
+            if (firstActiveItem) {
+                firstActiveItem.style.transform = 'scale(1.05)';
+            }
+        });
+
+        // Change image after the carousel slides
+        $('#carouselExample').on('slide.bs.carousel', function (event) {
+            currentImage = event.to; // Get the index of the new active slide
+            changeZoomImage(); // Update the zoom image for the new active image
+        });
+
+        // Moving block
+        function changeLoan(type, event) {
+            let imageMap = {
+                'auto': '../static/images/car loan.jpg',
+                'personal': '../static/images/personal loan.jpg',
+                'home': '../static/images/home loan.jpg',
+                'study': '../static/images/education loan.jpg'
+            };
+
+            document.getElementById('loanImage').src = imageMap[type];
+
+            // Highlight selected loan
+            document.querySelectorAll('.loan-item').forEach(item => item.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // Show header when scrolling upwards
+        let lastScrollTop = 0;
+        window.addEventListener('scroll', function () {
+            const navbar = document.querySelector('.navbar');
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            if (scrollTop > lastScrollTop) {
+                navbar.style.top = '-80px'; // Adjust based on your navbar height
+            } else {
+                navbar.style.top = '0';
+            }
+            lastScrollTop = scrollTop;
+        });
+
+        // Enable dropdowns on hover
+        document.querySelectorAll('.nav-item.dropdown').forEach(function (dropdown) {
+            dropdown.addEventListener('mouseenter', function () {
+                const dropdownMenu = this.querySelector('.dropdown-menu');
+                dropdownMenu.classList.add('show');
+            });
+            dropdown.addEventListener('mouseleave', function () {
+                const dropdownMenu = this.querySelector('.dropdown-menu');
+                dropdownMenu.classList.remove('show');
+            });
+        });
+
+        // Close navbar toggler on click
+        document.querySelectorAll('.nav-link').forEach(function (link) {
+            link.addEventListener('click', function () {
+                const navbarToggler = document.querySelector('.navbar-toggler');
+                const navbarCollapse = document.querySelector('.navbar-collapse');
+                if (navbarCollapse.classList.contains('show')) {
+                    navbarToggler.click();
+                }
+            });
+        });
+    </script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-element-bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Enable dropdowns on hover
+        document.querySelectorAll('.nav-item.dropdown').forEach(function (dropdown) {
+            dropdown.addEventListener('mouseenter', function () {
+                const dropdownMenu = this.querySelector('.dropdown-menu');
+                dropdownMenu.classList.add('show');
+            });
+            dropdown.addEventListener('mouseleave', function () {
+                const dropdownMenu = this.querySelector('.dropdown-menu');
+                dropdownMenu.classList.remove('show');
+            });
+        });
+    </script>
+</body>
+
+</html>

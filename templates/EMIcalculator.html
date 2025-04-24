@@ -1,0 +1,636 @@
+{% extends 'base.html' %}
+
+{% block title %} EMI Calculator {% endblock %}
+
+{% block content %}
+
+<div class="emi-calculator-container">
+    <div class="calculator-card">
+        <h2 class="calculator-title">EMI Calculator</h2>
+        
+        <div class="input-group">
+            <label for="loanAmount">Loan Amount (₹)</label>
+            <input type="number" id="loanAmount" placeholder="E.g. 500000" required>
+        </div>
+        
+        <div class="input-group">
+            <label for="interestRate">Annual Interest Rate (%)</label>
+            <input type="number" id="interestRate" placeholder="E.g. 8.5" step="0.01" required>
+        </div>
+        
+        <div class="input-group">
+            <label for="loanTenure">Loan Tenure (Years)</label>
+            <input type="number" id="loanTenure" placeholder="E.g. 5" required>
+        </div>
+        
+        <div class="input-group">
+            <label for="scheduleType">Schedule Type</label>
+            <select id="scheduleType">
+                <option value="monthly">Monthly Schedule</option>
+                <option value="yearly">Yearly Schedule</option>
+                <option value="quarterly">Quarterly Schedule</option>
+            </select>
+        </div>
+        
+        <div class="button-group">
+            <button class="calculate-btn" onclick="calculateEMI()">
+                <span class="btn-text">Calculate EMI</span>
+                <span class="spinner" style="display: none;"></span>
+            </button>
+            <button class="reset-btn" onclick="resetCalculator()">Reset</button>
+        </div>
+        
+        <div class="result-summary" id="result">
+            <div class="result-card">
+                <div class="result-icon">📊</div>
+                <div>
+                    <div class="result-label">Monthly EMI</div>
+                    <div class="result-value" id="monthlyEmi">₹0</div>
+                </div>
+            </div>
+            <div class="result-card">
+                <div class="result-icon">💰</div>
+                <div>
+                    <div class="result-label">Total Interest</div>
+                    <div class="result-value" id="totalInterest">₹0</div>
+                </div>
+            </div>
+            <div class="result-card">
+                <div class="result-icon">🧾</div>
+                <div>
+                    <div class="result-label">Total Payment</div>
+                    <div class="result-value" id="totalPayment">₹0</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="amortization-container">
+            <h3>Amortization Schedule</h3>
+            <div class="table-responsive">
+                <table class="amortization-table" id="amortizationTable">
+                    <thead>
+                        <tr>
+                            <th>Period</th>
+                            <th>Payment</th>
+                            <th>Principal</th>
+                            <th>Interest</th>
+                            <th>Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="amortizationBody">
+                        <tr class="empty-state">
+                            <td colspan="5">Enter loan details and calculate to see the schedule</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="table-controls">
+                <div class="pagination" id="paginationControls">
+                    <button id="prevPage" onclick="changePage(-1)" disabled>
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div id="pageNumbers" class="page-numbers"></div>
+                    <button id="nextPage" onclick="changePage(1)" disabled>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                
+                <button class="download-btn" id="downloadExcel" onclick="downloadExcel()">
+                    <i class="fas fa-file-excel"></i> Export to Excel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+<script>
+    let currentPage = 1;
+    const rowsPerPage = 10;
+    let allRows = [];
+    let emiData = {};
+
+    function calculateEMI() {
+        // Show loading state
+        const btn = document.querySelector('.calculate-btn');
+        btn.disabled = true;
+        document.querySelector('.btn-text').style.display = 'none';
+        document.querySelector('.spinner').style.display = 'inline-block';
+        
+        // Clear previous results
+        document.getElementById('amortizationBody').innerHTML = '';
+        document.getElementById('paginationControls').style.display = 'none';
+        
+        setTimeout(() => {
+            try {
+                const loanAmount = parseFloat(document.getElementById('loanAmount').value);
+                const interestRate = parseFloat(document.getElementById('interestRate').value);
+                const loanTenure = parseFloat(document.getElementById('loanTenure').value);
+                const scheduleType = document.getElementById('scheduleType').value;
+                
+                if (isNaN(loanAmount)) throw new Error('Please enter a valid loan amount');
+                if (isNaN(interestRate)) throw new Error('Please enter a valid interest rate');
+                if (isNaN(loanTenure)) throw new Error('Please enter a valid loan tenure');
+                if (loanAmount <= 0 || interestRate <= 0 || loanTenure <= 0) {
+                    throw new Error('Values must be greater than zero');
+                }
+                
+                const monthlyInterestRate = (interestRate / 100) / 12;
+                const numberOfPayments = loanTenure * 12;
+                
+                const emi = (loanAmount * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments)) /
+                             (Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1);
+                
+                const totalPayment = emi * numberOfPayments;
+                const totalInterest = totalPayment - loanAmount;
+                
+                // Update summary cards
+                document.getElementById('monthlyEmi').textContent = '₹' + emi.toFixed(2);
+                document.getElementById('totalInterest').textContent = '₹' + totalInterest.toFixed(2);
+                document.getElementById('totalPayment').textContent = '₹' + totalPayment.toFixed(2);
+                
+                // Store data for export
+                emiData = {
+                    loanAmount,
+                    interestRate,
+                    loanTenure,
+                    emi,
+                    totalInterest,
+                    totalPayment
+                };
+                
+                generateAmortizationSchedule(loanAmount, interestRate, loanTenure, emi, scheduleType);
+                
+            } catch (error) {
+                alert(error.message);
+            } finally {
+                // Restore button state
+                btn.disabled = false;
+                document.querySelector('.btn-text').style.display = 'inline-block';
+                document.querySelector('.spinner').style.display = 'none';
+            }
+        }, 300);
+    }
+
+    function generateAmortizationSchedule(principal, annualRate, years, emi, scheduleType) {
+        const monthlyRate = (annualRate / 100) / 12;
+        const months = years * 12;
+        let balance = principal;
+        allRows = [];
+        
+        // Remove empty state if exists
+        const emptyState = document.querySelector('.empty-state');
+        if (emptyState) emptyState.remove();
+        
+        // Determine payment intervals
+        let interval;
+        if (scheduleType === 'yearly') interval = 12;
+        else if (scheduleType === 'quarterly') interval = 3;
+        else interval = 1;
+        
+        for (let i = 1; i <= months; i++) {
+            const interest = balance * monthlyRate;
+            const principalPayment = emi - interest;
+            balance -= principalPayment;
+            
+            // Only add rows for the selected interval (or last payment)
+            if (i % interval === 0 || i === months) {
+                allRows.push({
+                    period: getPeriodLabel(i, scheduleType),
+                    payment: emi.toFixed(2),
+                    principal: principalPayment.toFixed(2),
+                    interest: interest.toFixed(2),
+                    balance: Math.max(balance, 0).toFixed(2)
+                });
+            }
+        }
+        
+        currentPage = 1;
+        renderTable();
+        document.getElementById('paginationControls').style.display = 'flex';
+    }
+    
+    function getPeriodLabel(month, scheduleType) {
+        if (scheduleType === 'yearly') return `Year ${Math.ceil(month/12)}`;
+        if (scheduleType === 'quarterly') return `Q${Math.ceil(month/3)} (Year ${Math.ceil(month/12)})`;
+        return `Month ${month}`;
+    }
+
+    function renderTable() {
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const rowsToShow = allRows.slice(start, end);
+        const tbody = document.getElementById('amortizationBody');
+        tbody.innerHTML = '';
+        
+        if (rowsToShow.length === 0) {
+            tbody.innerHTML = '<tr class="empty-state"><td colspan="5">No data to display</td></tr>';
+            return;
+        }
+        
+        rowsToShow.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${row.period}</td>
+                <td>₹${row.payment}</td>
+                <td>₹${row.principal}</td>
+                <td>₹${row.interest}</td>
+                <td>₹${row.balance}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+        
+        updatePaginationNumbers();
+    }
+
+    function updatePaginationNumbers() {
+        const totalPages = Math.ceil(allRows.length / rowsPerPage);
+        const pageNumbers = document.getElementById('pageNumbers');
+        pageNumbers.innerHTML = '';
+        
+        // Always show first page
+        addPageNumber(1, pageNumbers);
+        
+        // Show current page with neighbors
+        const startPage = Math.max(2, currentPage - 1);
+        const endPage = Math.min(totalPages - 1, currentPage + 1);
+        
+        if (startPage > 2) pageNumbers.innerHTML += '<span class="ellipsis">...</span>';
+        
+        for (let i = startPage; i <= endPage; i++) {
+            addPageNumber(i, pageNumbers);
+        }
+        
+        if (endPage < totalPages - 1) pageNumbers.innerHTML += '<span class="ellipsis">...</span>';
+        
+        // Always show last page if different from first
+        if (totalPages > 1) addPageNumber(totalPages, pageNumbers);
+        
+        // Update button states
+        document.getElementById('prevPage').disabled = currentPage === 1;
+        document.getElementById('nextPage').disabled = currentPage === totalPages;
+    }
+
+    function addPageNumber(page, container) {
+        const pageElement = document.createElement('span');
+        pageElement.textContent = page;
+        if (page === currentPage) pageElement.className = 'active';
+        pageElement.onclick = () => goToPage(page);
+        container.appendChild(pageElement);
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        renderTable();
+    }
+
+    function changePage(step) {
+        currentPage += step;
+        renderTable();
+    }
+
+    function downloadExcel() {
+        if (allRows.length === 0) {
+            alert('No data to export');
+            return;
+        }
+        
+        const worksheet = XLSX.utils.json_to_sheet([
+            {
+                'Loan Amount': `₹${emiData.loanAmount.toFixed(2)}`,
+                'Interest Rate': `${emiData.interestRate}%`,
+                'Tenure': `${emiData.loanTenure} years`,
+                'Monthly EMI': `₹${emiData.emi.toFixed(2)}`,
+                'Total Interest': `₹${emiData.totalInterest.toFixed(2)}`,
+                'Total Payment': `₹${emiData.totalPayment.toFixed(2)}`
+            },
+            {},
+            ...allRows.map(row => ({
+                'Period': row.period,
+                'Payment (₹)': row.payment,
+                'Principal (₹)': row.principal,
+                'Interest (₹)': row.interest,
+                'Balance (₹)': row.balance
+            }))
+        ]);
+        
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "EMI Schedule");
+        XLSX.writeFile(workbook, `EMI_Schedule_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+
+    function resetCalculator() {
+        document.getElementById('loanAmount').value = '';
+        document.getElementById('interestRate').value = '';
+        document.getElementById('loanTenure').value = '';
+        document.getElementById('scheduleType').value = 'monthly';
+        
+        document.getElementById('monthlyEmi').textContent = '₹0';
+        document.getElementById('totalInterest').textContent = '₹0';
+        document.getElementById('totalPayment').textContent = '₹0';
+        
+        document.getElementById('amortizationBody').innerHTML = `
+            <tr class="empty-state">
+                <td colspan="5">Enter loan details and calculate to see the schedule</td>
+            </tr>
+        `;
+        
+        document.getElementById('paginationControls').style.display = 'none';
+        allRows = [];
+    }
+</script>
+
+<style>
+    .emi-calculator-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .calculator-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .calculator-title {
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 25px;
+        font-weight: 600;
+        font-size: 28px;
+    }
+    
+    .input-group {
+        margin-bottom: 20px;
+    }
+    
+    .input-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #34495e;
+    }
+    
+    .input-group input, .input-group select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #dfe6e9;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+    }
+    
+    .input-group input:focus, .input-group select:focus {
+        border-color: #3498db;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+    
+    .button-group {
+        display: flex;
+        gap: 15px;
+        margin: 25px 0;
+    }
+    
+    .calculate-btn, .reset-btn {
+        flex: 1;
+        padding: 14px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+    
+    .calculate-btn {
+        background: #3498db;
+        color: white;
+    }
+    
+    .calculate-btn:hover {
+        background: #2980b9;
+    }
+    
+    .calculate-btn:disabled {
+        background: #bdc3c7;
+        cursor: not-allowed;
+    }
+    
+    .reset-btn {
+        background: #e74c3c;
+        color: white;
+    }
+    
+    .reset-btn:hover {
+        background: #c0392b;
+    }
+    
+    .spinner {
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+        margin-left: 10px;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    .result-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin: 30px 0;
+    }
+    
+    .result-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+    
+    .result-icon {
+        font-size: 24px;
+        background: #3498db;
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .result-label {
+        color: #7f8c8d;
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+    
+    .result-value {
+        font-size: 20px;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .amortization-container {
+        margin-top: 40px;
+    }
+    
+    .amortization-container h3 {
+        color: #2c3e50;
+        margin-bottom: 20px;
+        font-size: 22px;
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    .amortization-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    
+    .amortization-table th {
+        background: #3498db;
+        color: white;
+        padding: 12px 15px;
+        text-align: left;
+        font-weight: 500;
+    }
+    
+    .amortization-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #ecf0f1;
+    }
+    
+    .amortization-table tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .empty-state {
+        text-align: center;
+        color: #7f8c8d;
+        padding: 20px;
+    }
+    
+    .table-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .pagination {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .pagination button {
+        width: 36px;
+        height: 36px;
+        border: 1px solid #dfe6e9;
+        background: white;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+    
+    .pagination button:hover {
+        background: #f8f9fa;
+    }
+    
+    .pagination button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .page-numbers {
+        display: flex;
+        gap: 5px;
+    }
+    
+    .page-numbers span {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .page-numbers span:hover {
+        background: #f8f9fa;
+    }
+    
+    .page-numbers span.active {
+        background: #3498db;
+        color: white;
+    }
+    
+    .ellipsis {
+        cursor: default;
+    }
+    
+    .download-btn {
+        padding: 10px 20px;
+        background: #2ecc71;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.2s;
+    }
+    
+    .download-btn:hover {
+        background: #27ae60;
+    }
+    
+    @media (max-width: 768px) {
+        .result-summary {
+            grid-template-columns: 1fr;
+        }
+        
+        .button-group {
+            flex-direction: column;
+        }
+        
+        .table-controls {
+            flex-direction: column-reverse;
+        }
+    }
+</style>
+
+{% endblock %}

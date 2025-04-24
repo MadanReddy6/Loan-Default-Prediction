@@ -1,0 +1,433 @@
+{% extends 'base.html' %}
+
+{% block title %} Loan Applications {% endblock %}
+
+{% block content %}
+<!-- Include Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<div class="container">
+    <div class="row justify-content-center my-3">
+        <div class="col-md-10">
+            <div class="panel shadow p-3 rounded">
+                <h2 class="text-center mb-3">Loan Application</h2>
+                {% if error %}
+                <div class="alert alert-danger alert-dismissible fade show">
+                    {{ error }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endif %}
+                
+                <form id="loanForm" action="/predict" method="post">
+                    <div class="row">
+                        <!-- First Column (left side) -->
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="age">Age:</label>
+                                <input type="number" class="form-control" id="age" name="Age" min="18" max="100" required>
+                                <p class="text-danger mt-1 error-message" id="ageError"></p>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="income">Income:</label>
+                                <input type="number" class="form-control" id="income" name="Income" min="10000" required>
+                                <p class="text-danger mt-1 error-message" id="incomeError"></p>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="loanAmount">Loan Amount:</label>
+                                <input type="number" class="form-control" id="loanAmount" name="LoanAmount" min="100000" required>
+                                <p class="text-danger mt-1 error-message" id="loanAmountError"></p>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="creditScore">Credit Score:</label>
+                                <input type="number" class="form-control" id="creditScore" name="CreditScore" min="300" max="850" required>
+                                <p class="text-danger mt-1 error-message" id="creditScoreError"></p>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="monthsEmployed">Months Employed:
+                                    <i class="fas fa-info-circle" data-bs-toggle="tooltip" title="The total number of months you've been employed at your current job."></i>
+                                </label>
+                                <input type="number" class="form-control" id="monthsEmployed" name="MonthsEmployed" min="0" required>
+                                <p class="text-danger mt-1 error-message" id="monthsEmployedError"></p>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="numCreditLines">Number of Credit Lines:
+                                    <i class="fas fa-info-circle" data-bs-toggle="tooltip" title="Total number of credit cards and loans you currently have."></i>
+                                </label>
+                                <input type="number" class="form-control" id="numCreditLines" name="NumCreditLines" min="0" max="20" required>
+                                <p class="text-danger mt-1 error-message" id="numCreditLinesError"></p>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="interestRate">Interest Rate:</label>
+                                <input type="text" class="form-control" id="interestRate" name="InterestRate" disabled value="24%">
+                                <p class="text-danger mt-1 error-message" id="interestRateError"></p>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="loanTerm">Loan Term(Months):</label>
+                                <input type="number" class="form-control" id="loanTerm" name="LoanTerm" min="6" max="360" required>
+                                <p class="text-danger mt-1 error-message" id="loanTermError"></p>
+                            </div>
+                        </div>
+                
+                        <!-- Second Column (right side) -->
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="dtiRatio">DTI Ratio:
+                                    <i class="fas fa-info-circle" data-bs-toggle="tooltip" title="Debt-to-Income ratio, calculated as the percentage of your monthly income used to pay debts."></i>
+                                </label>
+                                <input type="number" class="form-control" id="dtiRatio" name="DTIRatio" min="0" max="100" step="0.01" required>
+                                <p class="text-danger mt-1 error-message" id="dtiRatioError"></p>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="education">Education:</label>
+                                <select class="form-select" id="education" name="Education" required>
+                                    <option value="" disabled selected>Select</option>
+                                    <option value="1">High School</option>
+                                    <option value="2">Bachelor's</option>
+                                    <option value="3">Master's</option>
+                                    <option value="4">PhD</option>
+                                </select>
+                                <p class="text-danger mt-1 error-message" id="educationError"></p>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="employmentType">Employment Type:</label>
+                                <select class="form-select" id="employmentType" name="EmploymentType" required>
+                                    <option value="" disabled selected>Select</option>
+                                    <option value="1">Unemployed</option>
+                                    <option value="2">Part-time</option>
+                                    <option value="3">Full-time</option>
+                                    <option value="4">Self-employed</option>
+                                </select>
+                                <p class="text-danger mt-1 error-message" id="employmentTypeError"></p>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="maritalStatus">Marital Status:</label>
+                                <select class="form-select" id="maritalStatus" name="MaritalStatus" required>
+                                    <option value="" disabled selected>Select</option>
+                                    <option value="1">Single</option>
+                                    <option value="2">Married</option>
+                                    <option value="3">Divorced</option>
+                                </select>
+                                <p class="text-danger mt-1 error-message" id="maritalStatusError"></p>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="hasMortgage">Do you have a mortgage?
+                                    <i class="fas fa-info-circle" data-bs-toggle="tooltip" title="Select 'Yes' if you currently have a mortgage on a property."></i>
+                                </label>
+                                <select class="form-select" id="hasMortgage" name="HasMortgage" required>
+                                    <option value="" disabled selected>Select</option>
+                                    <option value="1">Yes</option>
+                                    <option value="0">No</option>
+                                </select>
+                                <p class="text-danger mt-1 error-message" id="hasMortgageError"></p>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="hasDependents">Do you have dependents?
+                                    <i class="fas fa-info-circle" data-bs-toggle="tooltip" title="Select 'Yes' if you have any dependents that rely on your income."></i>
+                                </label>
+                                <select class="form-select" id="hasDependents" name="HasDependents" required>
+                                    <option value="" disabled selected>Select</option>
+                                    <option value="1">Yes</option>
+                                    <option value="0">No</option>
+                                </select>
+                                <p class="text-danger mt-1 error-message" id="hasDependentsError"></p>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="loanPurpose">Loan Purpose:</label>
+                                <select class="form-select" id="loanPurpose" name="LoanPurpose" required>
+                                    <option value="" disabled selected>Select</option>
+                                    <option value="1">Auto</option>
+                                    <option value="2">Business</option>
+                                    <option value="3">Education</option>
+                                    <option value="4">Home</option>
+                                    <option value="5">Other</option>
+                                </select>
+                                <p class="text-danger mt-1 error-message" id="loanPurposeError"></p>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="hasCosigner">Do you have a co-signer?
+                                    <i class="fas fa-info-circle" data-bs-toggle="tooltip" title="Select 'Yes' if someone is co-signing your loan."></i>
+                                </label>
+                                <select class="form-select" id="hasCosigner" name="HasCoSigner" required>
+                                    <option value="" disabled selected>Select</option>
+                                    <option value="1">Yes</option>
+                                    <option value="0">No</option>
+                                </select>
+                                <p class="text-danger mt-1 error-message" id="hasCosignerError"></p>
+                            </div>
+                        </div>
+                            <button type="submit" class="btn btn-primary btn-block w-100 py-2">
+                                <span id="submitText">Submit Application</span>
+                                <span id="spinner" class="spinner-border spinner-border-sm d-none"></span>
+                            </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('loanForm');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const submitText = document.getElementById('submitText');
+    const spinner = document.getElementById('spinner');
+
+    // Add event listeners for real-time validation
+    form.querySelectorAll('input, select').forEach(input => {
+        input.addEventListener('input', function() {
+            validateField(this);
+        });
+        input.addEventListener('change', function() {
+            validateField(this);
+        });
+        input.addEventListener('blur', function() {
+            validateField(this);
+        });
+    });
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Validate all fields before submission
+        let isValid = true;
+        form.querySelectorAll('input, select').forEach(input => {
+            if (!validateField(input)) {
+                isValid = false;
+            }
+        });
+        
+        if (!isValid) {
+            return;
+        }
+        
+        // Show loading state
+        submitText.textContent = 'Processing...';
+        spinner.classList.remove('d-none');
+        submitBtn.disabled = true;
+        
+        try {
+            const formData = new FormData(form);
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'text/html'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const html = await response.text();
+            document.open();
+            document.write(html);
+            document.close();
+            
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Submission failed. Please try again.');
+        } finally {
+            submitText.textContent = 'Submit Application';
+            spinner.classList.add('d-none');
+            submitBtn.disabled = false;
+        }
+    });
+    
+    function validateField(field) {
+        const errorElement = document.getElementById(`${field.id}Error`);
+        
+        // Reset error state
+        field.classList.remove('is-invalid');
+        errorElement.textContent = '';
+        
+        // Skip disabled fields
+        if (field.disabled) {
+            return true;
+        }
+        
+        // Check if required field is empty
+        if (field.required && !field.value.trim()) {
+            field.classList.add('is-invalid');
+            errorElement.textContent = 'This field is required';
+            return false;
+        }
+        
+        // Field-specific validations
+        switch(field.id) {
+            case 'age':
+                if (field.value < 18) {
+                    field.classList.add('is-invalid');
+                    errorElement.textContent = 'You must be at least 18 years old';
+                    return false;
+                }
+                if (field.value > 100) {
+                    field.classList.add('is-invalid');
+                    errorElement.textContent = 'Please enter a valid age';
+                    return false;
+                }
+                break;
+                
+            case 'income':
+                if (field.value < 10000) {
+                    field.classList.add('is-invalid');
+                    errorElement.textContent = 'Income must be at least $10,000';
+                    return false;
+                }
+                if (field.value > 10000000) {
+                    field.classList.add('is-invalid');
+                    errorElement.textContent = 'Please enter a reasonable income amount';
+                    return false;
+                }
+                break;
+                
+            case 'loanAmount':
+                if (field.value < 100000) {
+                    field.classList.add('is-invalid');
+                    errorElement.textContent = 'Minimum loan amount is 100,000';
+                    return false;
+                }
+                if (field.value > 10000000) {
+                    field.classList.add('is-invalid');
+                    errorElement.textContent = 'Maximum loan amount is 100,000,000';
+                    return false;
+                }
+                break;
+                
+            case 'creditScore':
+                if (field.value < 300 || field.value > 850) {
+                    field.classList.add('is-invalid');
+                    errorElement.textContent = 'Credit score must be between 300 and 850';
+                    return false;
+                }
+                break;
+                
+            case 'monthsEmployed':
+                if (field.value < 0) {
+                    field.classList.add('is-invalid');
+                    errorElement.textContent = 'Cannot be negative';
+                    return false;
+                }
+                if (field.value > 1200) {
+                    field.classList.add('is-invalid');
+                    errorElement.textContent = 'Please enter a reasonable value (max 100 years)';
+                    return false;
+                }
+                break;
+                
+            case 'numCreditLines':
+                if (field.value < 0) {
+                    field.classList.add('is-invalid');
+                    errorElement.textContent = 'Cannot be negative';
+                    return false;
+                }
+                if (field.value > 20) {
+                    field.classList.add('is-invalid');
+                    errorElement.textContent = 'Maximum of 20 credit lines allowed';
+                    return false;
+                }
+                break;
+                
+            case 'loanTerm':
+                if (field.value < 6) {
+                    field.classList.add('is-invalid');
+                    errorElement.textContent = 'Minimum loan term is 6 months';
+                    return false;
+                }
+                if (field.value > 360) {
+                    field.classList.add('is-invalid');
+                    errorElement.textContent = 'Maximum loan term is 360 months (30 years)';
+                    return false;
+                }
+                break;
+                
+            case 'dtiRatio':
+                if (field.value < 0 || field.value > 100) {
+                    field.classList.add('is-invalid');
+                    errorElement.textContent = 'DTI ratio must be between 0% and 100%';
+                    return false;
+                }
+                break;
+                
+            // Select fields
+            case 'education':
+            case 'employmentType':
+            case 'maritalStatus':
+            case 'hasMortgage':
+            case 'hasDependents':
+            case 'loanPurpose':
+            case 'hasCosigner':
+                if (field.required && !field.value) {
+                    field.classList.add('is-invalid');
+                    errorElement.textContent = 'Please select an option';
+                    return false;
+                }
+                break;
+        }
+        
+        return true;
+    }
+});
+</script>
+
+<style>
+.is-invalid {
+    border-color: #dc3545 !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23dc3545' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.is-invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+.d-none {
+    display: none;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.error-message {
+    font-size: 0.875rem;
+    min-height: 1.2rem;
+}
+
+.info-btn {
+    background-color: #fff;  /* White background for the button */
+    border: 1px solid #000;  /* Black border for the button */
+    border-radius: 50%;  /* Round shape */
+    padding: 5px;  /* Smaller padding */
+    margin-left: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;  /* Smooth hover effect */
+}
+
+.info-btn i {
+    color: #000;  /* Black icon color */
+    font-size: 14px;  /* Smaller icon size */
+}
+
+.info-btn:hover {
+    background-color: #f0f0f0;  /* Light gray background on hover */
+}
+
+.collapse {
+    margin-top: 5px;
+    font-size: 14px;
+    color: #555;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

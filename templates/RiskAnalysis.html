@@ -1,0 +1,908 @@
+{% extends 'base.html' %}
+
+{% block title %}Loan Default Analysis{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-center">Loan data analysis</h1>
+
+    <!-- Loading Indicator -->
+    <div id="loading-indicator" class="text-center my-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p>Loading loan data...</p>
+    </div>
+
+    <!-- Content that will be populated dynamically -->
+    <div id="dynamic-content" style="display: none;">
+        <!-- Message Display -->
+        <!-- <div id="message-container"></div> -->
+
+        <!-- Error Display -->
+        <!-- <div id="error-container"></div> -->
+
+        <!-- Data Summary Cards -->
+        <div id="summary-cards" class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-white bg-primary">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Loans</h5>
+                        <p id="total-loans" class="card-text display-6">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-danger">
+                    <div class="card-body">
+                        <h5 class="card-title">Default Loans</h5>
+                        <p id="default-loans" class="card-text display-6">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-success">
+                    <div class="card-body">
+                        <h5 class="card-title">Good Loans</h5>
+                        <p id="good-loans" class="card-text display-6">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-info text-white">
+
+                <h5>Loan Amount vs. Default Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="height: 500px; position: relative;"> 
+            <canvas id="scatterChart"></canvas>
+
+            </div>
+        </div>
+        </div>
+        <!-- Chart Container -->
+        <!-- <div class="chart-container" style="height: 500px; position: relative;">
+            <canvas id="scatterChart"></canvas>
+        </div> -->
+
+        <!-- Legend -->
+        <div class="mt-3 text-center">
+            <span class="badge bg-danger me-2">Default Loans</span>
+            <span class="badge bg-primary">Non-Default Loans</span>
+        </div>
+
+        <!-- Statistics Section -->
+        <div class="row mt-5">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+
+                        <h5>Loan Amount Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="amountDistributionChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5>Default Rate by Loan Size</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="defaultRateChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Add this in your dashboard's HTML section -->
+        <!-- <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5>Default Probability by Loan Amount</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="defaultProbabilityChart" height="300"></canvas>
+                        <div class="mt-3">
+                            <p class="mb-1"><strong>Correlation Coefficient:</strong> <span
+                                    id="correlationValue">0.00</span></p>
+                            <p class="text-muted small">(-1 to +1 where positive values indicate higher defaults with
+                                larger loans)</p>
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+            <!-- <div class="row mt-4">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h5>Loan Approval by Income Level</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="incomeApprovalChart" height="300"></canvas>
+                        </div>
+                        <div class="card-footer text-muted small">
+                            <p class="mb-0"><strong>Patterns to look for:</strong></p>
+                            <ul class="mb-0">
+                                <li>Higher approval rates for higher incomes (positive correlation)</li>
+                                <li>Approval thresholds at specific income levels</li>
+                                <li>Application volume concentration in certain brackets</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+               
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5>Loan Amount vs. Default Risk</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="bubbleChart" height="400"></canvas>
+                            </div>
+                            <div class="card-footer text-muted small">
+                                <p class="mb-0"><strong>Interpretation:</strong> Larger bubbles represent more loans in
+                                    that range. Red bubbles indicate higher default rates.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+        </div>
+    </div>
+</div>
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/luxon@3.0.1"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.2.0"></script>
+
+<script>
+    // Error display function
+    function showError(elementId, error) {
+        const errorContainer = document.getElementById(elementId) || document.getElementById('error-container');
+        if (!errorContainer) return;
+
+        errorContainer.innerHTML = `
+        <div class="alert alert-danger">
+            Error: ${error.message || 'Unknown error occurred'}
+        </div>
+    `;
+        errorContainer.style.display = 'block';
+        console.error(error);
+    }
+
+    // Chart instances storage
+    const chartInstances = {
+        scatter: null,
+        distribution: null,
+        defaultRate: null,
+        defaultProbability: null,
+        incomeApproval: null
+    };
+
+    // Initialize the dashboard
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('/loan_analysis')
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('loading-indicator').style.display = 'none';
+                document.getElementById('dynamic-content').style.display = 'block';
+                handleServerResponse(data);
+            })
+            .catch(error => {
+                document.getElementById('loading-indicator').style.display = 'none';
+                showError('error-container', error);
+            });
+    });
+
+    // Handle server response
+    function handleServerResponse(data) {
+        // Display messages if any
+        const messageContainer = document.getElementById('message-container');
+        if (data.error_message) {
+            messageContainer.innerHTML = `<div class="alert alert-danger">${data.error_message}</div>`;
+            messageContainer.style.display = 'block';
+            return;
+        } else if (data.warning) {
+            messageContainer.innerHTML = `<div class="alert alert-warning">${data.warning}</div>`;
+            messageContainer.style.display = 'block';
+        }
+
+        // Update summary cards
+        const totalLoans = data.loan_amounts?.length || 0;
+        const defaultLoans = data.default_status?.reduce((a, b) => a + b, 0) || 0;
+        const goodLoans = totalLoans - defaultLoans;
+
+        document.getElementById('total-loans').textContent = totalLoans.toLocaleString();
+        document.getElementById('default-loans').textContent = defaultLoans.toLocaleString();
+        document.getElementById('good-loans').textContent = goodLoans.toLocaleString();
+
+        // Create charts if we have data
+        if (data.loan_amounts?.length > 0) {
+            createScatterChart(data.loan_amounts, data.default_status);
+            createDistributionChart(data.loan_amounts);
+            createDefaultRateChart(data.loan_amounts, data.default_status);
+            analyzeDefaultProbability(data.loan_amounts, data.default_status);
+
+            // Create income approval chart if data exists
+            if (data.income_data && data.approval_status) {
+                createIncomeApprovalChart(data.income_data, data.approval_status);
+            }
+        }
+    }
+
+    // Main scatter chart function
+    function createScatterChart(loanAmounts, defaultStatus) {
+        try {
+            const ctx = document.getElementById('scatterChart');
+            if (!ctx) return;
+
+            // Destroy previous instance
+            if (chartInstances.scatter) {
+                chartInstances.scatter.destroy();
+            }
+
+            const defaults = [];
+            const nonDefaults = [];
+
+            // Process data in chunks to prevent performance issues
+            const chunkSize = 10000;
+            for (let i = 0; i < loanAmounts.length; i += chunkSize) {
+                const chunkEnd = Math.min(i + chunkSize, loanAmounts.length);
+                for (let j = i; j < chunkEnd; j++) {
+                    if (defaultStatus[j] === 1) {
+                        defaults.push({ x: loanAmounts[j], y: 1 });
+                    } else {
+                        nonDefaults.push({ x: loanAmounts[j], y: 0 });
+                    }
+                }
+            }
+
+            chartInstances.scatter = new Chart(ctx.getContext('2d'), {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Default Loans',
+                            data: defaults,
+                            backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        },
+                        {
+                            label: 'Non-Default Loans',
+                            data: nonDefaults,
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: {
+                                display: true,
+                                text: 'Loan Amount (₹)',
+                                font: { weight: 'bold', size: 14 }
+                            },
+                            ticks: {
+                                callback: function (value) {
+                                    if (value >= 10000000) return '₹' + (value / 10000000).toFixed(1) + 'Cr';
+                                    if (value >= 100000) return '₹' + (value / 100000).toFixed(1) + 'L';
+                                    return '₹' + value.toLocaleString();
+                                }
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Default Status',
+                                font: { weight: 'bold', size: 14 }
+                            },
+                            min: -0.2,
+                            max: 1.2,
+                            ticks: {
+                                stepSize: 0.5,
+                                callback: function (value) {
+                                    return value === 1 ? 'Default' : value === 0 ? 'Non-Default' : '';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const amount = context.parsed.x;
+                                    let amountStr;
+                                    if (amount >= 10000000) amountStr = '₹' + (amount / 10000000).toFixed(2) + ' crore';
+                                    else if (amount >= 100000) amountStr = '₹' + (amount / 100000).toFixed(2) + ' lakh';
+                                    else amountStr = '₹' + amount.toLocaleString();
+                                    return [
+                                        `Amount: ${amountStr}`,
+                                        `Status: ${context.parsed.y === 1 ? 'Default' : 'Non-Default'}`
+                                    ];
+                                }
+                            }
+                        },
+                        legend: {
+                            position: 'top',
+                            labels: { font: { size: 12 } }
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            showError('error-container', error);
+        }
+    }
+
+    // Loan Amount Distribution Chart
+    function createDistributionChart(amounts) {
+        try {
+            const ctx = document.getElementById('amountDistributionChart');
+            if (!ctx) return;
+
+            if (chartInstances.distribution) {
+                chartInstances.distribution.destroy();
+            }
+
+            // Predefined bins for loan amounts
+            const bins = [
+                { min: 0, max: 100000, count: 0, label: '₹0-1L' },
+                { min: 100000, max: 500000, count: 0, label: '₹1L-5L' },
+                { min: 500000, max: 1000000, count: 0, label: '₹5L-10L' },
+                { min: 1000000, max: 5000000, count: 0, label: '₹10L-50L' },
+                { min: 5000000, max: 10000000, count: 0, label: '₹50L-1Cr' },
+                { min: 10000000, max: Infinity, count: 0, label: '₹1Cr+' }
+            ];
+
+            // Process data in chunks to avoid stack overflow
+            const chunkSize = 10000;
+            for (let i = 0; i < amounts.length; i += chunkSize) {
+                const chunkEnd = Math.min(i + chunkSize, amounts.length);
+                for (let j = i; j < chunkEnd; j++) {
+                    const amount = amounts[j];
+                    for (const bin of bins) {
+                        if (amount >= bin.min && amount < bin.max) {
+                            bin.count++;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            const labels = bins.map(bin => bin.label);
+            const counts = bins.map(bin => bin.count);
+
+            chartInstances.distribution = new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Number of Loans',
+                        data: counts,
+                        backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Distribution of Loan Amounts' },
+                        tooltip: {
+                            callbacks: {
+                                title: context => context[0].label.replace('₹', 'Amount: ₹'),
+                                label: context => `Loans: ${context.raw.toLocaleString()}`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Number of Loans' },
+                            ticks: {
+                                callback: function (value) {
+                                    return value.toLocaleString();
+                                }
+                            }
+                        },
+                        x: {
+                            title: { display: true, text: 'Loan Amount Range' },
+                            ticks: { autoSkip: false }
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            showError('error-container', error);
+        }
+    }
+
+    // Default Rate by Loan Size Chart
+    function createDefaultRateChart(amounts, statuses) {
+        try {
+            const ctx = document.getElementById('defaultRateChart');
+            if (!ctx) return;
+
+            if (chartInstances.defaultRate) {
+                chartInstances.defaultRate.destroy();
+            }
+
+            // Define loan amount ranges
+            const ranges = [
+                { min: 0, max: 100000, label: '₹0-1L' },
+                { min: 100000, max: 500000, label: '₹1L-5L' },
+                { min: 500000, max: 1000000, label: '₹5L-10L' },
+                { min: 1000000, max: 5000000, label: '₹10L-50L' },
+                { min: 5000000, max: 10000000, label: '₹50L-1Cr' },
+                { min: 10000000, max: Infinity, label: '₹1Cr+' }
+            ];
+
+            const totals = new Array(ranges.length).fill(0);
+            const defaults = new Array(ranges.length).fill(0);
+
+            // Calculate totals and defaults for each range
+            const chunkSize = 10000;
+            for (let i = 0; i < amounts.length; i += chunkSize) {
+                const chunkEnd = Math.min(i + chunkSize, amounts.length);
+                for (let j = i; j < chunkEnd; j++) {
+                    const amount = amounts[j];
+                    const status = statuses[j];
+
+                    for (let k = 0; k < ranges.length; k++) {
+                        if (amount >= ranges[k].min && amount < ranges[k].max) {
+                            totals[k]++;
+                            if (status === 1) defaults[k]++;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Calculate default rates
+            const defaultRates = totals.map((total, i) =>
+                total > 0 ? (defaults[i] / total * 100) : 0
+            );
+
+            const labels = ranges.map(range => range.label);
+
+            chartInstances.defaultRate = new Chart(ctx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Default Rate (%)',
+                        data: defaultRates,
+                        backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        borderWidth: 2,
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Default Rate by Loan Size' },
+                        tooltip: {
+                            callbacks: {
+                                label: context => `${context.parsed.y.toFixed(1)}% default rate`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Default Rate (%)' },
+                            ticks: { callback: value => value + '%' }
+                        },
+                        x: {
+                            title: { display: true, text: 'Loan Amount Range' },
+                            ticks: { autoSkip: false }
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            showError('error-container', error);
+        }
+    }
+
+    // Default Probability Analysis
+    function analyzeDefaultProbability(loanAmounts, defaultStatus) {
+        try {
+            // Calculate default rates by loan amount bins
+            const defaultRates = calculateDefaultRates(loanAmounts, defaultStatus);
+
+            // Calculate correlation coefficient
+            const correlation = calculateCorrelation(loanAmounts, defaultStatus);
+
+            // Display correlation value
+            document.getElementById('correlationValue').textContent = correlation.toFixed(3);
+
+            // Create the chart
+            createDefaultProbabilityChart(defaultRates);
+
+        } catch (error) {
+            showError('error-container', error);
+        }
+    }
+
+    function calculateDefaultRates(loanAmounts, defaultStatus) {
+        const bins = [
+            { min: 0, max: 100000, label: '₹0-1L', total: 0, defaults: 0 },
+            { min: 100000, max: 500000, label: '₹1L-5L', total: 0, defaults: 0 },
+            { min: 500000, max: 1000000, label: '₹5L-10L', total: 0, defaults: 0 },
+            { min: 1000000, max: 5000000, label: '₹10L-50L', total: 0, defaults: 0 },
+            { min: 5000000, max: 10000000, label: '₹50L-1Cr', total: 0, defaults: 0 },
+            { min: 10000000, max: Infinity, label: '₹1Cr+', total: 0, defaults: 0 }
+        ];
+
+        // Process in chunks to handle large datasets
+        const chunkSize = 10000;
+        for (let i = 0; i < loanAmounts.length; i += chunkSize) {
+            const chunkEnd = Math.min(i + chunkSize, loanAmounts.length);
+            for (let j = i; j < chunkEnd; j++) {
+                const amount = loanAmounts[j];
+                const isDefault = defaultStatus[j] === 1;
+
+                for (const bin of bins) {
+                    if (amount >= bin.min && amount < bin.max) {
+                        bin.total++;
+                        if (isDefault) bin.defaults++;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return bins.map(bin => ({
+            range: bin.label,
+            defaultRate: bin.total > 0 ? (bin.defaults / bin.total) * 100 : 0,
+            totalLoans: bin.total
+        }));
+    }
+
+    function createDefaultProbabilityChart(defaultRates) {
+        const ctx = document.getElementById('defaultProbabilityChart');
+        if (!ctx) return;
+
+        if (chartInstances.defaultProbability) {
+            chartInstances.defaultProbability.destroy();
+        }
+
+        chartInstances.defaultProbability = new Chart(ctx.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: defaultRates.map(item => item.range),
+                datasets: [{
+                    label: 'Default Rate (%)',
+                    data: defaultRates.map(item => item.defaultRate),
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                const data = defaultRates[context.dataIndex];
+                                return [
+                                    `Default Rate: ${data.defaultRate.toFixed(2)}%`,
+                                    `Loans in range: ${data.totalLoans.toLocaleString()}`
+                                ];
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Default Rate (%)' },
+                        ticks: { callback: value => value + '%' }
+                    },
+                    x: {
+                        title: { display: true, text: 'Loan Amount Range' },
+                        ticks: { autoSkip: false }
+                    }
+                }
+            }
+        });
+    }
+
+    function calculateCorrelation(loanAmounts, defaultStatus) {
+        // Pearson correlation calculation
+        const n = loanAmounts.length;
+        if (n !== defaultStatus.length || n === 0) return 0;
+
+        let sumX = 0, sumY = 0, sumXY = 0;
+        let sumX2 = 0, sumY2 = 0;
+
+        // Process in chunks
+        const chunkSize = 10000;
+        for (let i = 0; i < n; i += chunkSize) {
+            const chunkEnd = Math.min(i + chunkSize, n);
+            for (let j = i; j < chunkEnd; j++) {
+                sumX += loanAmounts[j];
+                sumY += defaultStatus[j];
+                sumXY += loanAmounts[j] * defaultStatus[j];
+                sumX2 += loanAmounts[j] * loanAmounts[j];
+                sumY2 += defaultStatus[j] * defaultStatus[j];
+            }
+        }
+
+        const numerator = sumXY - (sumX * sumY) / n;
+        const denominator = Math.sqrt((sumX2 - sumX * sumX / n) * (sumY2 - sumY * sumY / n));
+
+        return denominator !== 0 ? numerator / denominator : 0;
+    }
+
+    // Income Approval Chart Functions
+    function createIncomeApprovalChart(incomes, approvals) {
+        try {
+            const ctx = document.getElementById('incomeApprovalChart');
+            if (!ctx) return;
+
+            if (chartInstances.incomeApproval) {
+                chartInstances.incomeApproval.destroy();
+            }
+
+            // Define income brackets
+            const brackets = [
+                { min: 0, max: 300000, label: '₹0-3L' },
+                { min: 300000, max: 600000, label: '₹3L-6L' },
+                { min: 600000, max: 1000000, label: '₹6L-10L' },
+                { min: 1000000, max: 1500000, label: '₹10L-15L' },
+                { min: 1500000, max: Infinity, label: '₹15L+' }
+            ];
+
+            // Initialize counters
+            const bracketData = brackets.map(b => ({
+                ...b,
+                applications: 0,
+                approved: 0
+            }));
+
+            // Process data in chunks
+            const chunkSize = 10000;
+            for (let i = 0; i < incomes.length; i += chunkSize) {
+                const chunkEnd = Math.min(i + chunkSize, incomes.length);
+                for (let j = i; j < chunkEnd; j++) {
+                    const income = incomes[j];
+                    const isApproved = approvals[j] === 1;
+
+                    for (const bracket of bracketData) {
+                        if (income >= bracket.min && income < bracket.max) {
+                            bracket.applications++;
+                            if (isApproved) bracket.approved++;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Calculate approval rates
+            const labels = bracketData.map(b => b.label);
+            const approvalRates = bracketData.map(b =>
+                b.applications > 0 ? (b.approved / b.applications * 100) : 0
+            );
+            const applicationCounts = bracketData.map(b => b.applications);
+
+            // Create the chart
+            chartInstances.incomeApproval = new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Approval Rate (%)',
+                            data: approvalRates,
+                            backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                            borderColor: 'rgba(40, 167, 69, 1)',
+                            borderWidth: 1,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Applications',
+                            data: applicationCounts,
+                            backgroundColor: 'rgba(108, 117, 125, 0.3)',
+                            borderColor: 'rgba(108, 117, 125, 1)',
+                            borderWidth: 1,
+                            type: 'line',
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Loan Approval by Income Level',
+                            font: { size: 16 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    if (context.datasetIndex === 0) {
+                                        return `Approval: ${context.raw.toFixed(1)}%`;
+                                    }
+                                    return `Applications: ${context.raw.toLocaleString()}`;
+                                },
+                                afterLabel: function (context) {
+                                    const bracket = bracketData[context.dataIndex];
+                                    return `Approved: ${bracket.approved.toLocaleString()}\nTotal: ${bracket.applications.toLocaleString()}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: 'Approval Rate (%)' },
+                            min: 0,
+                            max: 100,
+                            ticks: { callback: value => value + '%' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: { display: true, text: 'Applications' },
+                            grid: { drawOnChartArea: false }
+                        },
+                        x: {
+                            title: { display: true, text: 'Annual Income Range' }
+                        }
+                    }
+                }
+            });
+
+            // Generate insights
+            generateIncomeInsights(bracketData);
+        } catch (error) {
+            showError('error-container', error);
+        }
+    }
+
+    function generateIncomeInsights(bracketData) {
+        const insightsContainer = document.getElementById('incomeInsights');
+        if (!insightsContainer) return;
+
+        const totalApps = bracketData.reduce((sum, b) => sum + b.applications, 0);
+        const totalApproved = bracketData.reduce((sum, b) => sum + b.approved, 0);
+        const overallRate = totalApps > 0 ? (totalApproved / totalApps * 100) : 0;
+
+        const highest = bracketData.reduce((max, b) =>
+            (b.applications > 0 ? (b.approved / b.applications) : 0) >
+                (max.applications > 0 ? (max.approved / max.applications) : 0) ? b : max);
+
+        const lowest = bracketData.reduce((min, b) =>
+            (b.applications > 0 ? (b.approved / b.applications) : Infinity) <
+                (min.applications > 0 ? (min.approved / min.applications) : Infinity) ? b : min);
+
+        const mostApps = bracketData.reduce((max, b) => b.applications > max.applications ? b : max);
+
+        insightsContainer.innerHTML = `
+        <div class="card mt-3">
+            <div class="card-body">
+                <h5 class="card-title">Income Approval Insights</h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="alert alert-success">
+                            <h6>Highest Approval</h6>
+                            <p class="mb-0">${highest.label}: ${(highest.approved / highest.applications * 100).toFixed(1)}%</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="alert alert-warning">
+                            <h6>Most Applications</h6>
+                            <p class="mb-0">${mostApps.label}: ${mostApps.applications.toLocaleString()}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="alert alert-danger">
+                            <h6>Lowest Approval</h6>
+                            <p class="mb-0">${lowest.label}: ${(lowest.approved / lowest.applications * 100).toFixed(1)}%</p>
+                        </div>
+                    </div>
+                </div>
+                <p class="mb-1"><strong>Overall Approval Rate:</strong> ${overallRate.toFixed(1)}%</p>
+                <p class="mb-1"><strong>Total Applications:</strong> ${totalApps.toLocaleString()}</p>
+                <p class="mb-1"><strong>Total Approved:</strong> ${totalApproved.toLocaleString()}</p>
+            </div>
+        </div>
+    `;
+       
+}
+
+    
+</script>
+
+<style>
+    .chart-container {
+        width: 100%;
+        margin-bottom: 2rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .card {
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border: none;
+    }
+
+    .card-header {
+        font-weight: bold;
+    }
+
+    .badge {
+        font-size: 1rem;
+        padding: 8px 12px;
+    }
+
+    #loading-indicator {
+        transition: all 0.3s ease;
+    }
+
+    #dynamic-content {
+        transition: all 0.3s ease;
+    }
+
+    #correlationValue {
+        font-weight: bold;
+        color: #e74c3c;
+    }
+
+    .card-header h5 {
+        margin-bottom: 0;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+    }
+
+    .alert-warning {
+        background-color: #fff3cd;
+        border-color: #ffeeba;
+        color: #856404;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+    }
+</style>
+{% endblock %}
+{% endblock %}

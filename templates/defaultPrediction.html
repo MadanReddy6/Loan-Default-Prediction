@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% block title %} Loan Application {% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="panel">
+                <h2 class="text-center">Loan Default Prediction</h2>
+                
+                {% if error %}
+                <div class="alert alert-danger alert-dismissible fade show">
+                    {{ error }}
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                {% endif %}
+                
+                <form id="loanForm" action="/predict" method="post">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <!-- Column 1 -->
+                            <div class="form-group">
+                                <label for="age">Age:</label>
+                                <input type="number" class="form-control" id="age" name="Age" required min="18" max="100">
+                            </div>
+                            <div class="form-group">
+                                <label for="income">Income ($):</label>
+                                <input type="number" step="0.01" class="form-control" id="income" name="Income" required min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="loanAmount">Loan Amount ($):</label>
+                                <input type="number" step="0.01" class="form-control" id="loanAmount" name="LoanAmount" required min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="creditScore">Credit Score:</label>
+                                <input type="number" class="form-control" id="creditScore" name="CreditScore" required min="300" max="900">
+                            </div>
+                            <div class="form-group">
+                                <label for="monthsEmployed">Months Employed:</label>
+                                <input type="number" class="form-control" id="monthsEmployed" name="MonthsEmployed" required min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="numCreditLines">Number of Credit Lines:</label>
+                                <input type="number" class="form-control" id="numCreditLines" name="NumCreditLines" required min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="interestRate">Interest Rate (%):</label>
+                                <input type="number" step="0.01" class="form-control" id="interestRate" name="InterestRate" required min="0" max="30">
+                            </div>
+                            <div class="form-group">
+                                <label for="loanTerm">Loan Term (months):</label>
+                                <input type="number" class="form-control" id="loanTerm" name="LoanTerm" required min="1">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <!-- Column 2 -->
+                            <div class="form-group">
+                                <label for="dtiRatio">DTI Ratio (0-1):</label>
+                                <input type="number" step="0.01" class="form-control" id="dtiRatio" name="DTIRatio" required min="0" max="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="education">Education:</label>
+                                <select class="form-control" id="education" name="Education" required>
+                                    <option value="" disabled selected>Select</option>
+                                    <option value="1">High School</option>
+                                    <option value="2">Bachelor's</option>
+                                    <option value="3">Master's</option>
+                                    <option value="4">PhD</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="employmentType">Employment Type:</label>
+                                <select class="form-control" id="employmentType" name="EmploymentType" required>
+                                    <option value="" disabled selected>Select</option>
+                                    <option value="1">Unemployed</option>
+                                    <option value="2">Part-time</option>
+                                    <option value="3">Full-time</option>
+                                    <option value="4">Self-employed</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="maritalStatus">Marital Status:</label>
+                                <select class="form-control" id="maritalStatus" name="MaritalStatus" required>
+                                    <option value="" disabled selected>Select</option>
+                                    <option value="1">Single</option>
+                                    <option value="2">Married</option>
+                                    <option value="3">Divorced</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="hasMortgage">Do you have a mortgage?</label>
+                                <select class="form-control" id="hasMortgage" name="HasMortgage" required>
+                                    <option value="" disabled selected>Select</option>
+                                    <option value="1">Yes</option>
+                                    <option value="0">No</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="hasDependents">Do you have dependents?</label>
+                                <select class="form-control" id="hasDependents" name="HasDependents" required>
+                                    <option value="" disabled selected>Select</option>
+                                    <option value="1">Yes</option>
+                                    <option value="0">No</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="loanPurpose">Loan Purpose:</label>
+                                <select class="form-control" id="loanPurpose" name="LoanPurpose" required>
+                                    <option value="" disabled selected>Select</option>
+                                    <option value="1">Auto</option>
+                                    <option value="2">Business</option>
+                                    <option value="3">Education</option>
+                                    <option value="4">Home</option>
+                                    <option value="5">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="hasCosigner">Do you have a co-signer?</label>
+                                <select class="form-control" id="hasCosigner" name="HasCoSigner" required>
+                                    <option value="" disabled selected>Select</option>
+                                    <option value="1">Yes</option>
+                                    <option value="0">No</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block mt-3">
+                        <span id="submitText">Submit Application</span>
+                        <span id="spinner" class="spinner-border spinner-border-sm d-none"></span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('loanForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const form = this;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const submitText = document.getElementById('submitText');
+    const spinner = document.getElementById('spinner');
+    
+    // Validate form
+    const requiredFields = form.querySelectorAll('[required]');
+    let isValid = true;
+    
+    requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+            field.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            field.classList.remove('is-invalid');
+            
+            // Additional validation for number fields
+            if (field.type === 'number') {
+                const min = parseFloat(field.min) || -Infinity;
+                const max = parseFloat(field.max) || Infinity;
+                const value = parseFloat(field.value);
+                
+                if (isNaN(value) || value < min || value > max) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                }
+            }
+        }
+    });
+    
+    if (!isValid) {
+        alert('Please fill all required fields correctly.');
+        return;
+    }
+    
+    // Show loading state
+    submitText.textContent = 'Processing...';
+    spinner.classList.remove('d-none');
+    submitBtn.disabled = true;
+    
+    try {
+        const formData = new FormData(form);
+        const response = await fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'text/html'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const html = await response.text();
+        document.open();
+        document.write(html);
+        document.close();
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Submission failed. Please try again.');
+    } finally {
+        submitText.textContent = 'Submit Application';
+        spinner.classList.add('d-none');
+        submitBtn.disabled = false;
+    }
+});
+</script>
+
+<style>
+.is-invalid {
+    border-color: #dc3545 !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23dc3545' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.is-invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+.d-none {
+    display: none;
+}
+</style>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+{% endblock %}

@@ -1,0 +1,668 @@
+{% extends 'base.html' %}
+{% block title %} Personal Loan {% endblock %}
+
+{% block content %}
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .form-container {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+  }
+
+  /* Progress Bar */
+  #progressbar {
+    margin-bottom: 30px;
+    overflow: hidden;
+    counter-reset: step;
+  }
+
+  #progressbar li {
+    list-style-type: none;
+    color: #333;
+    font-size: 14px;
+    width: 33.33%;
+    float: left;
+    position: relative;
+    text-align: center;
+  }
+
+  #progressbar li:before {
+    content: counter(step);
+    counter-increment: step;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    display: block;
+    font-size: 14px;
+    color: #333;
+    background: #e0e0e0;
+    border-radius: 50%;
+    margin: 0 auto 5px auto;
+  }
+
+  #progressbar li:after {
+    content: '';
+    width: 100%;
+    height: 2px;
+    background: #e0e0e0;
+    position: absolute;
+    left: -50%;
+    top: 15px;
+    z-index: -1;
+  }
+
+  #progressbar li:first-child:after {
+    content: none;
+  }
+
+  #progressbar li.active:before,
+  #progressbar li.active:after {
+    background: rgb(135, 215, 235);
+    color: #fff;
+  }
+
+  /* Form Fields */
+  fieldset {
+    border: none;
+    padding: 20px;
+    display: none;
+  }
+
+  fieldset.active {
+    display: block;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+  }
+
+  input,
+  select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+
+  input:disabled {
+    background: #f9f9f9;
+  }
+
+  .error-message {
+    color: red;
+    font-size: 12px;
+    margin-top: -10px;
+    margin-bottom: 10px;
+  }
+
+  button {
+    padding: 10px 20px;
+    background: rgb(109, 198, 225);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  button:hover {
+    background: rgb(151, 221, 242);
+  }
+
+  .button-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+
+  .error {
+    color: red;
+    font-size: 12px;
+    margin-top: -10px;
+    margin-bottom: 10px;
+  }
+
+  /* DTI Info Icon */
+  .dti-info {
+    color: #007bff;
+    cursor: pointer;
+    margin-left: 5px;
+  }
+
+  /* Modal Styles */
+  .modal-body h6 {
+    margin-top: 15px;
+    color: #333;
+  }
+
+  .modal-body p {
+    margin-bottom: 10px;
+  }
+
+  .bg-light {
+    background-color: #f8f9fa!important;
+  }
+</style>
+
+<div class="form-container">
+  <h2>Personal Loan Application</h2>
+
+  <!-- Progress Bar -->
+  <ul id="progressbar">
+    <li class="active">Personal Details</li>
+    <li>Income Details</li>
+    <li>Loan Details</li>
+  </ul>
+
+  <!-- Form Sections -->
+  <form id="loanForm" action="/predict_personal_loan" method="post">
+    <!-- Personal Details -->
+    <fieldset id="personalDetails" class="active">
+      <label for="fullName">Full Name</label>
+      <input type="text" id="fullName" name="fullName" required>
+      <div class="error-message" id="fullNameError"></div>
+
+      <label for="pannumber">PAN Number</label>
+      <input type="text" id="pannumber" name="pannumber" required pattern="[A-Z]{5}[0-9]{4}[A-Z]">
+      <div class="error-message" id="pannumberError"></div>
+
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
+      <div class="error-message" id="emailError"></div>
+
+      <label for="phone">Phone Number</label>
+      <input type="tel" id="phone" name="phone" required pattern="[0-9]{10}">
+      <div class="error-message" id="phoneError"></div>
+
+      <label for="dob">Date of Birth</label>
+      <input type="date" id="dob" name="dob" required>
+      <div class="error-message" id="dobError"></div>
+
+      <div class="button-container">
+        <button type="button" id="next1">Next</button>
+      </div>
+    </fieldset>
+
+    <!-- Income Details -->
+    <fieldset id="incomeDetails">
+      <label for="monthlyIncome">Monthly Income (₹)</label>
+      <input type="number" id="monthlyIncome" name="monthlyIncome" min="10000" required>
+      <div class="error-message" id="monthlyIncomeError"></div>
+
+      <label for="monthlyDebt">Monthly Debt Payments (₹)</label>
+      <input type="number" id="monthlyDebt" name="monthlyDebt" min="0">
+      <div class="error-message" id="monthlyDebtError"></div>
+
+      <label for="DTIRatio">DTI Ratio (%)
+        <i class="bi bi-info-circle dti-info" data-bs-toggle="modal" data-bs-target="#dtiModal"></i>
+      </label>
+      <input type="number" id="DTIRatio" name="DTIRatio" min="0" max="100" step="0.01" readonly>
+      <div class="error-message" id="DTIRatioError"></div>
+      <small class="text-muted">Calculated automatically from income and debt</small>
+
+      <label for="employmentType">Employment Type</label>
+      <select id="employmentType" name="employmentType" required>
+        <option value="" selected>Select</option>
+        <option value="salaried">Salaried</option>
+        <option value="self-employed">Self-Employed</option>
+      </select>
+      <div class="error-message" id="employmentTypeError"></div>
+
+      <label for="companyName">Company Name</label>
+      <input type="text" id="companyName" name="companyName" required>
+      <div class="error-message" id="companyNameError"></div>
+
+      <div class="button-container">
+        <button type="button" id="prev1">Previous</button>
+        <button type="button" id="next2">Next</button>
+      </div>
+    </fieldset>
+
+    <!-- Loan Details -->
+    <fieldset id="loanDetails">
+      <label for="CreditScore">Credit Score</label>
+      <input type="number" name="CreditScore" id="CreditScore" min="300" max="850" required>
+      <div class="error-message" id="CreditScoreError"></div>
+
+      <label for="NumCreditLines">Number of Credit Lines</label>
+      <input type="number" name="NumCreditLines" id="NumCreditLines" min="0" required>
+      <div class="error-message" id="NumCreditLinesError"></div>
+
+      <label for="loanAmount">Loan Amount (₹)</label>
+      <input type="number" id="loanAmount" name="loanAmount" min="10000" required>
+      <div class="error-message" id="loanAmountError"></div>
+
+      <label for="tenure">Loan Tenure (Months)</label>
+      <input type="number" id="tenure" name="tenure" min="6"  required>
+      <div class="error-message" id="tenureError"></div>
+
+      <label for="interestRate">Interest Rate (%)</label>
+      <input type="number" id="interestRate" name="interestRate" disabled>
+      <div class="error-message" id="interestRateError"></div>
+
+      <div id="emiResult" class="error"></div>
+
+      <button type="button" id="calculateEMI">Calculate EMI</button>
+
+      <div class="button-container">
+        <button type="button" id="prev2">Previous</button>
+        <button type="submit">Submit</button>
+      </div>
+    </fieldset>
+  </form>
+</div>
+
+<!-- DTI Ratio Information Modal -->
+<div class="modal fade" id="dtiModal" tabindex="-1" aria-labelledby="dtiModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="dtiModalLabel">Debt-to-Income Ratio (DTI)</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <h6>What is DTI Ratio?</h6>
+        <p>Your debt-to-income ratio (DTI) compares how much you owe each month to how much you earn.</p>
+        
+        <h6>How to calculate:</h6>
+        <p class="bg-light p-3 rounded">
+          <strong>DTI Ratio = (Total Monthly Debt Payments ÷ Monthly Income) × 100</strong>
+        </p>
+        
+        <h6>Example:</h6>
+        <p>If your monthly debt payments are ₹15,000 and your monthly income is ₹50,000:</p>
+        <p class="bg-light p-3 rounded">
+          (15,000 ÷ 50,000) × 100 = <strong>30% DTI Ratio</strong>
+        </p>
+        
+        <h6>What's a good DTI?</h6>
+        <ul>
+          <li><strong>Excellent:</strong> Below 20%</li>
+          <li><strong>Good:</strong> 20-35%</li>
+          <li><strong>Manageable:</strong> 36-43%</li>
+          <li><strong>High Risk:</strong> Above 43%</li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it!</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Bootstrap Icons CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+
+<script>
+  // Progress Bar and Form Navigation
+  const progressbar = document.getElementById('progressbar').children;
+  const fieldsets = document.querySelectorAll('fieldset');
+  let currentStep = 0;
+
+  // Navigation functions
+  document.getElementById('next1').addEventListener('click', () => {
+    if (validateSection('personalDetails') && validatePhone() && validatePAN()) {
+      currentStep = 1;
+      updateActiveSection();
+    }
+  });
+
+  document.getElementById('next2').addEventListener('click', () => {
+    if (validateSection('incomeDetails')) {
+      currentStep = 2;
+      updateActiveSection();
+    }
+  });
+
+  document.getElementById('prev1').addEventListener('click', () => {
+    currentStep = 0;
+    updateActiveSection();
+  });
+
+  document.getElementById('prev2').addEventListener('click', () => {
+    currentStep = 1;
+    updateActiveSection();
+  });
+
+  function updateActiveSection() {
+    // Remove active class from all
+    fieldsets.forEach(fieldset => fieldset.classList.remove('active'));
+    Array.from(progressbar).forEach(li => li.classList.remove('active'));
+
+    // Add active class to current
+    fieldsets[currentStep].classList.add('active');
+    progressbar[currentStep].classList.add('active');
+  }
+
+  // Validation functions
+  function validateSection(sectionId) {
+    const inputs = document.querySelectorAll(`#${sectionId} input[required], #${sectionId} select[required]`);
+    let isValid = true;
+
+    inputs.forEach(input => {
+      const errorElement = document.getElementById(`${input.id}Error`);
+      errorElement.textContent = '';
+      input.classList.remove('is-invalid');
+
+      if (!input.value) {
+        errorElement.textContent = 'This field is required';
+        input.classList.add('is-invalid');
+        isValid = false;
+      } else if (input.type === 'email' && !validateEmail(input.value)) {
+        errorElement.textContent = 'Please enter a valid email address';
+        input.classList.add('is-invalid');
+        isValid = false;
+      } else if (input.id === 'dob' && !validateAge(input.value)) {
+        errorElement.textContent = 'You must be at least 18 years old';
+        input.classList.add('is-invalid');
+        isValid = false;
+      }
+    });
+
+    return isValid;
+  }
+
+  function validateEmail(email) {
+    const re = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
+    return re.test(email);
+  }
+
+  function validatePhone() {
+    const phoneInput = document.getElementById('phone');
+    const errorElement = document.getElementById('phoneError');
+    const phoneRegex = /^[0-9]{10}$/;
+
+    errorElement.textContent = '';
+    phoneInput.classList.remove('is-invalid');
+
+    if (!phoneInput.value) {
+      errorElement.textContent = 'Phone number is required';
+      phoneInput.classList.add('is-invalid');
+      return false;
+    }
+
+    if (!phoneRegex.test(phoneInput.value)) {
+      errorElement.textContent = 'Phone number must be exactly 10 digits';
+      phoneInput.classList.add('is-invalid');
+      return false;
+    }
+
+    return true;
+  }
+
+  function validatePAN() {
+    const panInput = document.getElementById('pannumber');
+    const errorElement = document.getElementById('pannumberError');
+    const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
+
+    errorElement.textContent = '';
+    panInput.classList.remove('is-invalid');
+
+    if (!panInput.value) {
+      errorElement.textContent = 'PAN number is required';
+      panInput.classList.add('is-invalid');
+      return false;
+    }
+
+    if (!panRegex.test(panInput.value)) {
+      errorElement.textContent = 'Invalid PAN format (e.g., ABCDE1234F)';
+      panInput.classList.add('is-invalid');
+      return false;
+    }
+
+    return true;
+  }
+
+  function validateAge(dobString) {
+    const dob = new Date(dobString);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+
+    return age >= 18;
+  }
+
+  // DTI Ratio Calculation
+  const monthlyIncomeInput = document.getElementById('monthlyIncome');
+  const monthlyDebtInput = document.getElementById('monthlyDebt');
+  const dtiRatioInput = document.getElementById('DTIRatio');
+
+  monthlyIncomeInput.addEventListener('input', calculateDTIRatio);
+  monthlyDebtInput.addEventListener('input', calculateDTIRatio);
+
+  function calculateDTIRatio() {
+    const monthlyIncome = parseFloat(monthlyIncomeInput.value) || 0;
+    const monthlyDebt = parseFloat(monthlyDebtInput.value) || 0;
+
+    if (monthlyIncome <= 0) {
+      dtiRatioInput.value = '';
+      return;
+    }
+
+    const dtiRatio = (monthlyDebt / monthlyIncome) * 100;
+    dtiRatioInput.value = dtiRatio.toFixed(2);
+  }
+
+  // Interest Rate Calculation
+  const loanAmountInput = document.getElementById('loanAmount');
+  const tenureInput = document.getElementById('tenure');
+  const interestRateInput = document.getElementById('interestRate');
+
+  loanAmountInput.addEventListener('input', calculateInterestRate);
+  tenureInput.addEventListener('input', calculateInterestRate);
+
+  function calculateInterestRate() {
+    const loanAmount = parseFloat(loanAmountInput.value) || 0;
+    const tenure = parseFloat(tenureInput.value) || 0;
+
+    if (loanAmount <= 0 || tenure <= 0) {
+      interestRateInput.value = '';
+      return;
+    }
+
+    let interestRate = 10; // Base interest rate
+
+    // Adjust based on loan amount
+    if (loanAmount >= 100000 && loanAmount <= 500000) {
+      interestRate = 12;
+    } else if (loanAmount > 500000) {
+      interestRate = 15;
+    }
+
+    // Adjust based on tenure
+    if (tenure > 24) {
+      interestRate += 1;
+    }
+
+    interestRateInput.disabled = false;
+    interestRateInput.value = interestRate.toFixed(2);
+    interestRateInput.disabled = true;
+  }
+
+  // EMI Calculation
+  document.getElementById('calculateEMI').addEventListener('click', () => {
+    const loanAmount = parseFloat(loanAmountInput.value);
+    const tenure = parseFloat(tenureInput.value);
+    const interestRate = parseFloat(interestRateInput.value);
+    const emiResult = document.getElementById('emiResult');
+
+    if (isNaN(loanAmount)) {
+      emiResult.textContent = 'Please enter loan amount';
+      emiResult.style.color = 'red';
+      return;
+    }
+
+    if (isNaN(tenure)) {
+      emiResult.textContent = 'Please enter loan tenure';
+      emiResult.style.color = 'red';
+      return;
+    }
+
+    if (isNaN(interestRate)) {
+      emiResult.textContent = 'Please calculate interest rate first';
+      emiResult.style.color = 'red';
+      return;
+    }
+
+    const monthlyInterestRate = interestRate / 12 / 100;
+    const emi = (loanAmount * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, tenure)) /
+      (Math.pow(1 + monthlyInterestRate, tenure) - 1);
+
+    emiResult.textContent = `Estimated EMI: ₹${emi.toFixed(2)} per month`;
+    emiResult.style.color = 'green';
+  });
+
+  // PAN Number Check
+  document.getElementById('pannumber').addEventListener('blur', function () {
+    const pannumber = this.value;
+    const errorElement = document.getElementById('pannumberError');
+
+    if (!pannumber) return;
+
+    // First validate format
+    if (!validatePAN()) return;
+
+    // Check if PAN exists in database
+    fetch(`/check_pan?pannumber=${pannumber}`)
+      .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+      })
+      .then(data => {
+        if (data.exists) {
+          errorElement.textContent = "This PAN number is already associated with an existing loan.";
+          document.getElementById('next1').disabled = true;
+        } else {
+          errorElement.textContent = "";
+          document.getElementById('next1').disabled = false;
+        }
+      })
+      .catch(error => {
+        console.error('Error checking PAN number:', error);
+        errorElement.textContent = "Error verifying PAN number. Please try again.";
+      });
+  });
+
+  // Form Submission
+  document.getElementById('loanForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    // Validate all sections
+    if (!validateSection('personalDetails') || !validateSection('incomeDetails') || !validateSection('loanDetails')) {
+      alert('Please fill all required fields correctly');
+      return;
+    }
+
+    // Additional validations
+    if (!validatePhone() || !validatePAN() || !validateAge(document.getElementById('dob').value)) {
+      return;
+    }
+
+    // Check loan amount vs income
+    const monthlyIncome = parseFloat(document.getElementById('monthlyIncome').value);
+    const loanAmount = parseFloat(loanAmountInput.value);
+    if (loanAmount > 20 * monthlyIncome) {
+      alert('Loan amount cannot exceed 20 times your monthly income');
+      return;
+    }
+
+    // Check credit score
+    const creditScore = parseFloat(document.getElementById('CreditScore').value);
+    if (creditScore < 300 || creditScore > 900) {
+      alert('Credit score must be between 300 and 900');
+      return;
+    }
+
+    // Check DTI ratio
+    const dtiRatio = parseFloat(document.getElementById('DTIRatio').value);
+    if (dtiRatio > 50) {
+      if (!confirm('Your DTI ratio is high. Are you sure you want to proceed?')) {
+        return;
+      }
+    }
+
+    // Prepare form data
+    const formData = {
+      fullName: document.getElementById('fullName').value,
+      pannumber: document.getElementById('pannumber').value,
+      email: document.getElementById('email').value,
+      phone: document.getElementById('phone').value,
+      dob: document.getElementById('dob').value,
+      monthlyIncome: monthlyIncome,
+      monthlyDebt: parseFloat(document.getElementById('monthlyDebt').value) || 0,
+      DTIRatio: dtiRatio,
+      employmentType: document.getElementById('employmentType').value,
+      companyName: document.getElementById('companyName').value,
+      loanAmount: loanAmount,
+      tenure: parseFloat(document.getElementById('tenure').value),
+      CreditScore: creditScore,
+      NumCreditLines: parseFloat(document.getElementById('NumCreditLines').value),
+      interestRate: parseFloat(interestRateInput.value)
+    };
+
+    try {
+      const response = await fetch('/predict_personal_loan', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        // Redirect to results page with prediction data
+        window.location.href = `/results?prediction=${result.prediction}&risk_probability=${result.risk_probability}&credibility_score=${result.credibility_score}&credit_score=${result.credit_score}`;
+      } else {
+        throw new Error(result.error || 'Unknown error occurred');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      document.getElementById('emiResult').textContent = `Error: ${error.message}`;
+      document.getElementById('emiResult').style.color = 'red';
+    }
+  });
+
+  // Initialize date picker with max date (18 years ago)
+  document.addEventListener('DOMContentLoaded', function () {
+    const today = new Date();
+    const maxDate = new Date();
+    maxDate.setFullYear(today.getFullYear() - 18);
+    document.getElementById('dob').max = maxDate.toISOString().split('T')[0];
+    
+    // Initialize Bootstrap tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  });
+</script>
+
+<!-- Bootstrap JS Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

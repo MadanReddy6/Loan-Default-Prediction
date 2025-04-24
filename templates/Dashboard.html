@@ -1,0 +1,731 @@
+{% extends 'base.html' %}
+
+{% block title %} Dashboard {% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Main title -->
+    <h1 class="text-center mb-5">Loan Portfolio Dashboard</h1>
+
+    <!-- Top Row - Full width cards -->
+    <div class="row mb-4">
+        <!-- Loan default rate -->
+        <div class="col-12 mb-4">
+            <div class="card border-0 shadow h-100">
+                <div class="card-header bg-info text-white">
+                    <h3 class="card-title mb-0">Total Loan Default Rate</h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="chart-container" style="height:400px;">
+                        <img src="../static/newplot.png" alt="Loan Default Rate"
+                            class="img-fluid d-block mx-auto w-100 h-100" style="object-fit: contain;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- heat Map -->
+        <!-- Top Features -->
+        <div class="col-12">
+            <div class="card border-0 shadow h-100">
+                <div class="card-header bg-info text-white">
+                    <h3 class="card-title mb-0">Top Features Affecting Loan Default Risk</h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="chart-container" style="height:400px;">
+                        <canvas id="topFeaturesBarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- heat map -->
+
+    <div class="col-12 mb-4">
+        <div class="card border-0 shadow">
+            <div class="card-header bg-info text-white">
+                <h3 class="card-title mb-0">Heatmap of features impacting defaults</h3>
+            </div>
+            <div class="card-body p-4">
+                <div class="chart-container" style="height:800px; overflow: hidden;">
+                    <!-- Make image responsive with Bootstrap's img-fluid class -->
+                    <img src="../static/NewHeatMap.png" alt="Heatmap of features impacting defaults" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Middle Row - Split view -->
+    <div class="row mb-4">
+        <!-- Borrower Segmentation -->
+        <div class="col-12 col-lg-6 mb-4 mb-lg-0">
+            <div class="card border-0 shadow h-100">
+                <div class="card-header bg-info text-white">
+                    <h3 class="card-title mb-0">Borrower Segmentation</h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="chart-container" style="height:400px;">
+                        <canvas id="borrowerSegmentationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loan Portfolio Analytics -->
+        <div class="col-12 col-lg-6">
+            <div class="card border-0 shadow h-100">
+                <div class="card-header bg-info text-white">
+                    <h3 class="card-title mb-0"> Credit Score Threshold </h3>
+                </div>
+                <div class="card-body p-4">
+                    <div id="creditScoreContainer" class="row justify-content-center h-100">
+                        <!-- Content will be inserted here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Row - Split view -->
+    <div class="row">
+        <!-- Default Rates by Employment Type -->
+        <div class="col-12 col-lg-6 mb-4 mb-lg-0">
+            <div class="card border-0 shadow h-100">
+                <div class="card-header bg-info text-white">
+                    <h3 class="card-title mb-0">Default Rates by Employment Type</h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="chart-container" style="height:350px;">
+                        <canvas id="defaultRatesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Default Probability by Age Group -->
+        <div class="col-12 col-lg-6">
+            <div class="card border-0 shadow h-100">
+                <div class="card-header bg-info text-white">
+                    <h3 class="card-title mb-0">Default Probability by Age Group</h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="chart-container" style="height:350px;">
+                        <canvas id="defaultProbabilityByAgeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="chart-container mb-4" style="height: 500px;"> <!-- Container height -->
+            <div class="card shadow h-100"> <!-- Card fills container -->
+                <div class="card-header py-3 d-flex justify-content-between align-items-center bg-info text-white">
+                    <h3 class="card-title text-white">Loan Approval Rates by Income Level</h3>
+                </div>
+                <div class="card-body p-0 d-flex"> <!-- Flex container for chart -->
+                    <div class="chart-area flex-grow-1" style="position: relative;"> <!-- Chart fills space -->
+                        <canvas id="incomeApprovalChart" 
+                                style="display: block; width: 100% !important; height: 100% !important;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- default by emp type and DTI ratio -->
+    <div class="row mt-3 ">
+        <div class="chart-container mb-4" style="height: 600px;"> <!-- Container height -->
+            <div class="card shadow h-100"> <!-- Card fills container -->
+                <div class="card-header py-3 d-flex justify-content-between align-items-center bg-info text-white">
+                    <h3 class="card-title text-white">Impact of Credit History Length on Default Rates</h3>
+                </div>
+                <div class="card-body p-0 d-flex align-items-center justify-content-center"> <!-- Centered flex container -->
+                    <div class="chart-area w-100 h-100 text-center" style="position: relative; overflow: hidden"> <!-- Full width/height -->
+                        <img src="../static/default rate by credit history length with years.png" 
+                             alt="Default Rate by Credit History Length" 
+                             >
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Default rates by EmploymentType and DTI Ratio -->
+    <div class="row mt-3 ">
+        <div class="chart-container mb-4" style="height: 650px;"> <!-- Container height -->
+            <div class="card shadow h-100"> <!-- Card fills container -->
+                <div class="card-header py-3 d-flex justify-content-between align-items-center bg-info text-white">
+                    <h3 class="card-title text-white">Default rates by EmploymentType and DTI Ratio</h3>
+                </div>
+                <div class="card-body p-0 d-flex align-items-center justify-content-center"> <!-- Centered flex container -->
+                    <div class="chart-area w-100 h-100 text-center" style="position: relative; overflow: hidden"> <!-- Full width/height -->
+                        <img src="../static/Default rates by EmploymentType and DTI Ratio.png" 
+                             alt="Default Rate by Credit History Length" 
+                             >
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- correlation bw loan amount and defult probability -->
+    <!-- <div class="row mt-3 ">
+        <div class="chart-container mb-4" style="height: 780px;"> 
+            <div class="card shadow h-100"> 
+                <div class="card-header py-3 d-flex justify-content-between align-items-center bg-info text-white">
+                    <h3 class="card-title text-white">Correlation between loan amount and default probability</h3>
+                </div>
+                <div class="card-body p-0 d-flex align-items-center justify-content-center"> 
+                    <div class="chart-area w-100 h-100 text-center" style="position: relative; overflow: hidden"> 
+                        <img src="../static/correlation between loan amount and default probability.png" 
+                             alt="Default Rate by Credit History Length" 
+                             >
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> -->
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Color palette
+        const colors = {
+            primary: '#4e73df',
+            success: '#1cc88a',
+            info: '#36b9cc',
+            warning: '#f6c23e',
+            danger: '#e74a3b',
+            secondary: '#858796',
+            dark: '#5a5c69'
+        };
+
+        // Fetch all data in a single request
+        fetch('/combined_dashboard_data')
+            .then(response => response.json())
+            .then(data => {
+                console.log("Full data received:", data);
+
+                // Display credit score info
+                displayCreditScoreInfo(data);
+
+                // Create all charts
+                createTopFeaturesChart(data);
+                createBorrowerSegmentationChart(data);
+                createDefaultRatesChart(data);
+                createAgeGroupChart(data);
+                createIncomeApprovalChart(data); // Add this line
+            })
+            .catch(error => console.error('Error:', error));
+
+        function displayCreditScoreInfo(data) {
+            try {
+                const threshold = data.credit_score_threshold || 600;
+                const analysis = data.credit_score_analysis || {
+                    min_score: 'N/A',
+                    max_score: 'N/A',
+                    avg_score: 'N/A'
+                };
+
+                const thresholdInfo = `
+                    
+     <div class="card-body text-center p-4">
+    <!-- Glowing shadow container -->
+    <div class="p-4 rounded-lg" style="
+        box-shadow: 0 4px 20px rgba(46, 89, 217, 0.15);
+        border-radius: 12px;
+        background: white;
+        max-width: 320px;
+        margin: 0 auto;
+    ">
+        <!-- Title with subtle shadow -->
+        <div class="text-uppercase mb-3" style="
+            letter-spacing: 1px;
+            color: #6c757d;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.05);
+        ">
+            Minimum Credit Score
+        </div>
+        
+        <!-- Main value with floating effect -->
+        <div class="display-3 font-weight-bold mb-3" style="
+            color: #2e59d9;
+            text-shadow: 0 3px 10px rgba(46, 89, 217, 0.2);
+            line-height: 1;
+        ">
+            ${threshold}
+        </div>
+        
+        <!-- Stats with soft background -->
+        <div class="d-flex justify-content-center gap-4 p-3 rounded" style="
+            background: rgba(233, 236, 239, 0.4);
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+        ">
+            <div>
+                <div class="text-xs text-muted mb-1">Range</div>
+                <div class="font-weight-bold">${analysis.min_score}-${analysis.max_score}</div>
+            </div>
+            
+        </div>
+        
+        <!-- Decorative icon with floating effect -->
+        <div class="mt-3">
+            <i class="fas fa-credit-card fa-2x" style="
+                color: #2e59d9;
+                opacity: 0.8;
+                filter: drop-shadow(0 2px 4px rgba(46, 89, 217, 0.3));
+            "></i>
+        </div>
+    </div>
+</div>
+                    
+                `;
+
+                const container = document.getElementById('creditScoreContainer');
+                if (container) {
+                    container.innerHTML = thresholdInfo;
+                }
+            } catch (error) {
+                console.error("Error displaying credit score info:", error);
+            }
+        }
+
+        function createTopFeaturesChart(data) {
+            try {
+                const correlationMatrix = data.correlation_data.correlation_matrix;
+                const topFeatures = data.correlation_data.top_features;
+                const topFeaturesLabels = topFeatures.slice(1);
+                const topFeaturesValues = topFeaturesLabels.map(feature => correlationMatrix['Default'][feature]);
+
+                const ctx = document.getElementById('topFeaturesBarChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: topFeaturesLabels,
+                        datasets: [{
+                            label: 'Correlation with Default',
+                            data: topFeaturesValues,
+                            backgroundColor: 'rgba(78, 115, 223, 0.8)',
+                            borderColor: 'rgba(78, 115, 223, 1)',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    display: true,
+                                    drawBorder: false
+                                },
+                                ticks: {
+                                    color: colors.dark
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: colors.dark
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleFont: {
+                                    size: 14
+                                },
+                                bodyFont: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error creating top features chart:', error);
+                document.getElementById('topFeaturesBarChart').closest('.chart-container').style.display = 'none';
+            }
+        }
+
+        function createBorrowerSegmentationChart(data) {
+            try {
+                const segmentationData = data.borrower_segmentation;
+
+                // Filter out unwanted categories
+                const validEntries = segmentationData.employment_types
+                    .map((type, index) => ({
+                        type,
+                        count: segmentationData.counts[index]
+                    }))
+                    .filter(entry => {
+                        const lowerType = entry.type.toLowerCase();
+                        return (
+                            entry.type !== "4" &&
+                            lowerType !== "unknown" &&
+                            entry.type.trim() !== "" &&
+                            lowerType !== "retired" &&
+                            lowerType !== "employed"
+                        );
+                    });
+
+                const filteredEmploymentTypes = validEntries.map(entry => entry.type);
+                const filteredCounts = validEntries.map(entry => entry.count);
+
+                const ctx = document.getElementById('borrowerSegmentationChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: filteredEmploymentTypes,
+                        datasets: [{
+                            label: 'Number of Borrowers',
+                            data: filteredCounts,
+                            backgroundColor: [
+                                colors.primary,
+                                colors.success,
+                                colors.info,
+                                colors.warning,
+                                colors.danger,
+                                colors.secondary
+                            ],
+                            borderColor: '#fff',
+                            borderWidth: 2,
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    padding: 20,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleFont: {
+                                    size: 14
+                                },
+                                bodyFont: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        cutout: '70%'
+                    }
+                });
+            } catch (error) {
+                console.error('Error creating segmentation chart:', error);
+                document.getElementById('borrowerSegmentationChart').closest('.chart-container').style.display = 'none';
+            }
+        } function createDefaultRatesChart(data) {
+            try {
+                const segmentationData = data.borrower_segmentation;
+                const validEntries = segmentationData.employment_types
+                    .map((type, index) => ({
+                        type,
+                        count: segmentationData.counts[index],
+                        defaultRate: data.default_rates.default_rates[index]
+                    }))
+                    .filter(entry => {
+                        const lowerType = entry.type.toLowerCase();
+                        return (
+                            entry.type !== "4" &&
+                            lowerType !== "unknown" &&
+                            entry.type.trim() !== "" &&
+                            lowerType !== "retired" &&
+                            lowerType !== "employed"
+                        );
+                    });
+
+                const filteredEmploymentTypes = validEntries.map(entry => entry.type);
+                const filteredDefaultRates = validEntries.map(entry => entry.defaultRate);
+
+                const ctx = document.getElementById('defaultRatesChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: filteredEmploymentTypes,
+                        datasets: [{
+                            label: 'Default Rate',
+                            data: filteredDefaultRates,
+                            backgroundColor: 'rgba(231, 74, 59, 0.8)',
+                            borderColor: 'rgba(231, 74, 59, 1)',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return (context.raw * 100).toFixed(2) + '%';
+                                    }
+                                },
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    display: true,
+                                    drawBorder: false
+                                },
+                                ticks: {
+                                    callback: function (value) {
+                                        return (value * 100).toFixed(0) + '%';
+                                    },
+                                    color: colors.dark
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: colors.dark
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error creating default rates chart:', error);
+                document.getElementById('defaultRatesChart').closest('.chart-container').style.display = 'none';
+            }
+        }
+
+        function createAgeGroupChart(data) {
+            try {
+                const ageGroupData = data.default_probability_by_age_group;
+                const ageGroups = ageGroupData.age_groups || [];
+                const defaultProbabilities = ageGroupData.default_probabilities || [];
+
+                if (ageGroups.length === 0 || defaultProbabilities.length === 0 || ageGroups.length !== defaultProbabilities.length) {
+                    throw new Error('Invalid age group data');
+                }
+
+                const ctx = document.getElementById('defaultProbabilityByAgeChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ageGroups,
+                        datasets: [{
+                            label: 'Default Probability',
+                            data: defaultProbabilities,
+                            backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return (context.raw * 100).toFixed(2) + '%';
+                                    }
+                                },
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    display: true,
+                                    drawBorder: false
+                                },
+                                ticks: {
+                                    callback: function (value) {
+                                        return (value * 100).toFixed(0) + '%';
+                                    },
+                                    color: colors.dark
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: colors.dark
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error creating age group chart:', error);
+                document.getElementById('defaultProbabilityByAgeChart').closest('.chart-container').style.display = 'none';
+            }
+        }
+        function createIncomeApprovalChart(data) {
+    try {
+        const incomeData = data.income_vs_approval;
+        
+        // Combine and sort data in ascending order
+        const combined = incomeData.income_groups.map((group, index) => ({
+            group,
+            rate: incomeData.approval_rates[index]
+        })).sort((a, b) => a.rate - b.rate); // For descending: b.rate - a.rate
+
+        // Extract sorted data
+        const sortedGroups = combined.map(item => item.group);
+        const sortedRates = combined.map(item => item.rate);
+
+        const ctx = document.getElementById('incomeApprovalChart').getContext('2d');
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: sortedGroups, // Sorted income groups
+                datasets: [{
+                    label: 'Approval Rate (%)',
+                    data: sortedRates, // Sorted approval rates
+                    backgroundColor: 'rgba(30, 200, 138, 0.7)', // Green for approval
+                    borderColor: 'rgba(30, 200, 138, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => `${context.parsed.y.toFixed(1)}% approved`
+                        },
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: (value) => `${value}%`,
+                            color: colors.dark
+                        },
+                        grid: {
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: colors.dark
+                        }
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error creating income approval chart:', error);
+        document.getElementById('incomeApprovalChart').closest('.chart-container').style.display = 'none';
+    }
+}
+    });
+</script>
+
+<style>
+    body {
+        background-color: #f8f9fc;
+    }
+
+    .card {
+        border-radius: 0.35rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .card-header {
+        border-radius: 0.35rem 0.35rem 0 0 !important;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .chart-container {
+        position: relative;
+        width: 100%;
+    }
+
+    .progress {
+        border-radius: 0.35rem;
+        background-color: #eaecf4;
+    }
+
+    .progress-bar {
+        background-color: #4e73df;
+    }
+
+    .bg-gradient-success {
+        background: linear-gradient(90deg, #1cc88a 0%, #28a745 100%);
+    }
+
+    @media (max-width: 768px) {
+        .card-header h3 {
+            font-size: 1.2rem;
+        }
+
+        .chart-container {
+            height: 300px !important;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .card-header h3 {
+            font-size: 1.1rem;
+        }
+
+        #borrowerSegmentationChart {
+            max-width: 300px;
+            margin: 0 auto;
+        }
+    }
+</style>
+{% endblock %}
