@@ -1,0 +1,557 @@
+/* ═══════════════════════════════════════════════════
+   LoanZone Voice Bot — Styles
+   Premium floating voice assistant UI
+   ═══════════════════════════════════════════════════ */
+
+/* ── Google Font ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ── Variables ── */
+:root {
+    --vb-primary: #007bff;
+    --vb-primary-dark: #0056b3;
+    --vb-accent: #00D1FF;
+    --vb-dark: #1D2147;
+    --vb-bg: #ffffff;
+    --vb-text: #333333;
+    --vb-text-light: #888888;
+    --vb-border: rgba(0, 0, 0, 0.08);
+    --vb-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    --vb-radius: 20px;
+    --vb-fab-size: 60px;
+}
+
+/* ── Floating Action Button ── */
+#voicebot-fab {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    width: var(--vb-fab-size);
+    height: var(--vb-fab-size);
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--vb-primary), var(--vb-accent));
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 24px rgba(0, 123, 255, 0.4);
+    z-index: 99999;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+    animation: vb-fab-entrance 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 1s both;
+}
+
+#voicebot-fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 32px rgba(0, 123, 255, 0.5);
+}
+
+#voicebot-fab:active {
+    transform: scale(0.95);
+}
+
+#voicebot-fab svg {
+    width: 28px;
+    height: 28px;
+    fill: white;
+    transition: transform 0.3s ease;
+}
+
+#voicebot-fab.open svg {
+    transform: rotate(180deg);
+}
+
+@keyframes vb-fab-entrance {
+    0% {
+        opacity: 0;
+        transform: scale(0) translateY(40px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* ── Pulse Ring (when idle) ── */
+#voicebot-fab::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(0, 123, 255, 0.3);
+    animation: vb-pulse 2s ease-out infinite;
+    z-index: -1;
+}
+
+#voicebot-fab.open::before {
+    animation: none;
+    opacity: 0;
+}
+
+@keyframes vb-pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(1.8);
+        opacity: 0;
+    }
+}
+
+/* ── Chat Panel ── */
+#voicebot-panel {
+    position: fixed;
+    bottom: 100px;
+    right: 28px;
+    width: 400px;
+    max-height: 560px;
+    background: var(--vb-bg);
+    border-radius: var(--vb-radius);
+    box-shadow: var(--vb-shadow);
+    z-index: 99998;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: scale(0.4) translateY(40px);
+    transform-origin: bottom right;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+#voicebot-panel.open {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* ── Panel Header ── */
+.vb-header {
+    background: linear-gradient(135deg, var(--vb-dark), #2a2d6e);
+    color: white;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.vb-header-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--vb-primary), var(--vb-accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.vb-header-avatar svg {
+    width: 22px;
+    height: 22px;
+    fill: white;
+}
+
+.vb-header-info {
+    flex: 1;
+}
+
+.vb-header-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.vb-header-status {
+    font-size: 12px;
+    opacity: 0.8;
+    margin: 2px 0 0 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.vb-status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #4caf50;
+    display: inline-block;
+    animation: vb-status-blink 2s infinite;
+}
+
+@keyframes vb-status-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.vb-header-close {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+    flex-shrink: 0;
+}
+
+.vb-header-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* ── Language Toggle ── */
+.vb-lang-toggle {
+    display: flex;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    padding: 3px;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.vb-lang-btn {
+    padding: 4px 10px;
+    border: none;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    transition: all 0.25s ease;
+    line-height: 1.3;
+}
+
+.vb-lang-btn:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.vb-lang-btn.active {
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Messages Area ── */
+.vb-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #f8f9fb;
+    min-height: 280px;
+    max-height: 340px;
+}
+
+.vb-messages::-webkit-scrollbar {
+    width: 5px;
+}
+
+.vb-messages::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+}
+
+/* ── Message Bubbles ── */
+.vb-message {
+    display: flex;
+    gap: 8px;
+    max-width: 88%;
+    animation: vb-msg-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.vb-message.bot {
+    align-self: flex-start;
+}
+
+.vb-message.user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.vb-msg-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 14px;
+}
+
+.vb-message.bot .vb-msg-avatar {
+    background: linear-gradient(135deg, var(--vb-primary), var(--vb-accent));
+    color: white;
+}
+
+.vb-message.user .vb-msg-avatar {
+    background: #e8edf2;
+    color: var(--vb-text);
+}
+
+.vb-msg-bubble {
+    padding: 10px 14px;
+    border-radius: 16px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    word-wrap: break-word;
+}
+
+.vb-message.bot .vb-msg-bubble {
+    background: white;
+    color: var(--vb-text);
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.vb-message.user .vb-msg-bubble {
+    background: linear-gradient(135deg, var(--vb-primary), #0069d9);
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+@keyframes vb-msg-in {
+    0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ── Typing Indicator ── */
+.vb-typing {
+    display: flex;
+    gap: 4px;
+    padding: 12px 16px;
+    align-items: center;
+}
+
+.vb-typing-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--vb-text-light);
+    animation: vb-typing-bounce 1.4s infinite ease-in-out;
+}
+
+.vb-typing-dot:nth-child(2) { animation-delay: 0.16s; }
+.vb-typing-dot:nth-child(3) { animation-delay: 0.32s; }
+
+@keyframes vb-typing-bounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+}
+
+/* ── Input Area ── */
+.vb-input-area {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-top: 1px solid var(--vb-border);
+    background: white;
+    flex-shrink: 0;
+}
+
+.vb-text-input {
+    flex: 1;
+    border: 1.5px solid #e0e4ea;
+    border-radius: 24px;
+    padding: 10px 16px;
+    font-size: 13.5px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background: #f8f9fb;
+}
+
+.vb-text-input:focus {
+    border-color: var(--vb-primary);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    background: white;
+}
+
+.vb-text-input::placeholder {
+    color: #adb5bd;
+}
+
+/* ── Mic Button ── */
+.vb-mic-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, var(--vb-primary), var(--vb-accent));
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+}
+
+.vb-mic-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(0, 123, 255, 0.3);
+}
+
+.vb-mic-btn:active {
+    transform: scale(0.95);
+}
+
+.vb-mic-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: white;
+}
+
+/* Listening state */
+.vb-mic-btn.listening {
+    background: linear-gradient(135deg, #ff4444, #ff6b6b);
+    animation: vb-mic-pulse 1.2s infinite;
+}
+
+.vb-mic-btn.listening::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 68, 68, 0.4);
+    animation: vb-mic-ring 1.2s infinite;
+}
+
+@keyframes vb-mic-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.4); }
+    50% { box-shadow: 0 0 0 12px rgba(255, 68, 68, 0); }
+}
+
+@keyframes vb-mic-ring {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* ── Send Button ── */
+.vb-send-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    background: var(--vb-primary);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.vb-send-btn:hover {
+    transform: scale(1.05);
+    background: var(--vb-primary-dark);
+}
+
+.vb-send-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.vb-send-btn svg {
+    width: 18px;
+    height: 18px;
+    fill: white;
+}
+
+/* ── Quick Actions (Chips) ── */
+.vb-quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 16px;
+    background: #f8f9fb;
+}
+
+.vb-chip {
+    padding: 6px 12px;
+    border-radius: 16px;
+    border: 1px solid #e0e4ea;
+    background: white;
+    font-size: 12px;
+    color: var(--vb-text);
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.vb-chip:hover {
+    background: var(--vb-primary);
+    color: white;
+    border-color: var(--vb-primary);
+    transform: translateY(-1px);
+}
+
+/* ── Listening overlay text ── */
+.vb-listening-text {
+    text-align: center;
+    font-size: 12px;
+    color: var(--vb-text-light);
+    padding: 4px 0;
+    font-style: italic;
+    animation: vb-listening-fade 1.5s infinite;
+}
+
+@keyframes vb-listening-fade {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+    #voicebot-panel {
+        width: calc(100vw - 20px);
+        right: 10px;
+        bottom: 80px;
+        max-height: 70vh;
+        border-radius: 16px;
+    }
+
+    #voicebot-fab {
+        bottom: 16px;
+        right: 16px;
+        width: 54px;
+        height: 54px;
+    }
+}
+
+/* ── Power badge ── */
+.vb-powered {
+    text-align: center;
+    padding: 6px;
+    font-size: 10px;
+    color: #bbb;
+    background: white;
+    border-top: 1px solid var(--vb-border);
+}
