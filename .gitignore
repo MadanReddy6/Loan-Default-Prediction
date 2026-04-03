@@ -1,3 +1,4 @@
 .env
 training.ipynb
 Loan_venv/
+__pycache__/
