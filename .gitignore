@@ -1,4 +1,5 @@
 .env
-training.ipynb
-Loan_venv/
-__pycache__/
+Loan_venv
+__pycache__
+
+
