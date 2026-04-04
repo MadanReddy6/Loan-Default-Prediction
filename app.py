@@ -22,6 +22,11 @@ import matplotlib.pyplot as plt
 
 app = Flask(__name__)
 
+# Register Voice Bot Blueprint
+from voicebot import voicebot_bp
+app.register_blueprint(voicebot_bp)
+
+
 Cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 CACHE_TIMEOUT = 3600  # 1 hour cache duration
